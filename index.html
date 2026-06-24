@@ -1,0 +1,2834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Test Record Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:       #111111;
+      --bg2:      #181818;
+      --bg3:      #222222;
+      --bg4:      #2a2a2a;
+      --border:   #2e2e2e;
+      --text:     #ffffff;
+      --muted:    #888888;
+      --muted2:   #555555;
+      --red:      #c41230;
+      --red-dim:  #8a0e22;
+      --gold:     #c9963b;
+      --gold-dim: #7a5a1e;
+      --gold-l:   #e0b560;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+
+    /* ── TEST BANNER ───────────────────────────────── */
+    .test-banner {
+      background: var(--red);
+      color: #fff;
+      text-align: center;
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 3px;
+      padding: 7px 20px;
+      text-transform: uppercase;
+    }
+
+    /* ── SHIPPING BAR ──────────────────────────────── */
+    .ship-bar {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 32px;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .5px;
+    }
+    .ship-bar a { color: var(--muted); text-decoration: none; transition: color .2s; }
+    .ship-bar a:hover { color: var(--text); }
+    .ship-bar .socials { display:flex; gap:14px; align-items:center; }
+    .ship-bar .socials a { font-size:16px; }
+    .ship-center { display:flex; align-items:center; gap:6px; }
+    .ship-center .dot { color: var(--gold); font-size:8px; }
+
+    /* ── HEADER ────────────────────────────────────── */
+    header {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 72px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+    }
+    .logo-svg { width: 54px; height: 54px; flex-shrink: 0; }
+    .logo-text { line-height: 1; }
+    .logo-text .l1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      color: var(--text);
+      letter-spacing: 3px;
+    }
+    .logo-text .l2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .logo-text .l3 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      color: var(--red);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    /* desktop nav */
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .main-nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      transition: color .2s;
+      position: relative;
+    }
+    .main-nav a::after {
+      content: '';
+      position: absolute;
+      left: 14px; right: 14px; bottom: 6px;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transition: transform .2s;
+    }
+    .main-nav a:hover { color: var(--text); }
+    .main-nav a:hover::after { transform: scaleX(1); }
+
+    /* genre dropdown */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a { display:flex; align-items:center; gap:5px; }
+    .nav-dropdown:hover .dropdown-menu { opacity:1; pointer-events:all; transform:translateY(0); }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 1px);
+      left: 0;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--gold);
+      min-width: 200px;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: opacity .2s, transform .2s;
+    }
+    .dropdown-menu a {
+      display: block;
+      padding: 10px 18px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s, background .15s;
+      border: none;
+    }
+    .dropdown-menu a::after { display:none; }
+    .dropdown-menu a:hover { color: var(--text); background: var(--bg3); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 6px;
+      transition: color .2s;
+      position: relative;
+    }
+    .icon-btn:hover { color: var(--text); }
+    .cart-badge {
+      position: absolute;
+      top: 0; right: 0;
+      background: var(--red);
+      color: #fff;
+      border-radius: 50%;
+      width: 16px; height: 16px;
+      font-size: 10px;
+      display: flex; align-items:center; justify-content:center;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+    }
+    .copy-email-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all .2s;
+      border-radius: 3px;
+    }
+    .copy-email-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── HERO ──────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 520px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(42,82,201,.18) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(201,150,59,.06) 0%, transparent 50%);
+    }
+    .hero-vinyl {
+      position: absolute;
+      right: -60px; top: 50%;
+      transform: translateY(-50%);
+      opacity: .12;
+      animation: slowSpin 30s linear infinite;
+    }
+    .hero-logo-wrap {
+      position: absolute;
+      right: 8%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: clamp(240px, 28vw, 400px);
+      height: clamp(240px, 28vw, 400px);
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(201,150,59,.18), 0 0 120px rgba(42,82,201,.12);
+      flex-shrink: 0;
+    }
+    .hero-logo-wrap svg {
+      width: 100%; height: 100%; display: block;
+    }
+    .hero-logo-wrap img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      z-index: 2;
+    }
+    @keyframes slowSpin { from{transform:translateY(-50%) rotate(0deg)} to{transform:translateY(-50%) rotate(360deg)} }
+    .hero-content {
+      position: relative;
+      padding: 80px 64px;
+      max-width: 700px;
+    }
+    .hero-eyebrow {
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 32px; height: 1px;
+      background: var(--gold);
+    }
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 7vw, 90px);
+      line-height: .95;
+      letter-spacing: 2px;
+      color: var(--text);
+    }
+    .hero h1 .red { color: var(--red); }
+    .hero p {
+      font-size: 15px;
+      color: var(--muted);
+      margin-top: 24px;
+      line-height: 1.7;
+      max-width: 460px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      margin-top: 36px;
+      flex-wrap: wrap;
+    }
+    .btn-red {
+      background: var(--red);
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px 32px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background .2s, transform .1s;
+    }
+    .btn-red:hover { background: #a00f26; transform: translateY(-2px); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 13px 32px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── NOW PLAYING ───────────────────────────────── */
+    .now-playing {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 32px;
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      overflow: hidden;
+    }
+    .np-icon { animation: spin 4s linear infinite; display:inline-block; font-size:18px; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .np-label { color: var(--muted2); font-size:11px; white-space:nowrap; }
+    .np-track { color: var(--text); transition: opacity .4s; white-space:nowrap; }
+    .np-divider { color: var(--muted2); }
+
+    /* ── HOURS STRIP ───────────────────────────────── */
+    .hours-strip {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+      overflow: hidden;
+    }
+    .hours-item {
+      padding: 12px 20px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+      flex: 1;
+      min-width: 110px;
+    }
+    .hours-item:last-child { border-right: none; }
+    .hours-day {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hours-time {
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      margin-top: 3px;
+    }
+    .hours-item.closed .hours-time { color: var(--muted2); }
+    .hours-item.today-h { background: rgba(196,18,48,.08); }
+    .hours-item.today-h .hours-day { color: var(--red); }
+    .hours-item.today-h .hours-time { color: var(--red); }
+
+    /* ── SECTION ───────────────────────────────────── */
+    .section { padding: 64px 32px; max-width: 1400px; margin: 0 auto; }
+    .section-full { padding: 64px 0; }
+    .section-inner { max-width: 1400px; margin: 0 auto; padding: 0 32px; }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      gap: 16px;
+    }
+    .section-head h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      letter-spacing: 2px;
+      color: var(--text);
+      line-height: 1;
+    }
+    .section-head a {
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 1px solid var(--muted2);
+      padding-bottom: 2px;
+      white-space: nowrap;
+      transition: color .2s, border-color .2s;
+    }
+    .section-head a:hover { color: var(--gold); border-color: var(--gold); }
+
+    /* ── CAROUSEL ──────────────────────────────────── */
+    .carousel-wrap { position: relative; }
+    .carousel {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 4px;
+    }
+    .carousel::-webkit-scrollbar { display: none; }
+    .carousel .product-card { flex: 0 0 220px; scroll-snap-align: start; }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items:center; justify-content:center;
+      transition: background .2s, border-color .2s;
+      z-index: 2;
+    }
+    .carousel-btn:hover { background: var(--bg4); border-color: var(--gold); }
+    .carousel-btn.prev { left: -19px; }
+    .carousel-btn.next { right: -19px; }
+    @media (hover: none) and (pointer: coarse) {
+      .carousel-btn { top: 30%; }
+    }
+
+    /* ── PRODUCT CARD ──────────────────────────────── */
+    .product-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: border-color .2s, transform .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+    .product-card:hover .card-overlay { opacity: 1; }
+
+    .card-art {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg);
+    }
+    .card-art svg { width: 100%; height: 100%; display: block; }
+    .card-art img { pointer-events: none; -webkit-user-drag: none; user-select: none; }
+    .card-loading {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,.45);
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px; letter-spacing: 2px;
+      color: var(--muted); text-transform: uppercase;
+      z-index: 2; pointer-events: none;
+    }
+    .card-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.5);
+      display: flex; align-items:center; justify-content:center;
+      opacity: 0;
+      transition: opacity .2s;
+      z-index: 2;
+    }
+    .card-add-btn {
+      background: var(--red);
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 12px 24px;
+      border: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .card-add-btn:hover { background: #a00f26; }
+
+    /* badge on card art */
+    .card-badge {
+      position: absolute;
+      top: 10px; left: 10px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      z-index: 3;
+    }
+    .badge-new  { background: var(--red);  color:#fff; }
+    .badge-sale { background: var(--gold); color:#111; }
+    .badge-staff{ background: var(--bg3);  color:var(--gold); border: 1px solid var(--gold-dim); }
+    .badge-rare { background: #4a1a7a; color:#e0b0ff; border: 1px solid #7a3aaa; }
+    .sale-chip.active, .sale-chip:hover { color: #c9963b; border-color: #c9963b; background: rgba(201,150,59,.12); }
+    .rare-chip.active, .rare-chip:hover { color: #c080ff; border-color: #7a3aaa; background: rgba(120,50,180,.12); }
+
+    .card-info { padding: 14px; }
+    .card-type {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted2);
+      margin-bottom: 4px;
+    }
+    .card-artist {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .card-price {
+      font-family: 'Oswald', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-genre-tag {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted2);
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── GRID ──────────────────────────────────────── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── GENRE BROWSE ──────────────────────────────── */
+    .genres-bg {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .genre-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .genre-chip {
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s, background .15s;
+      background: none;
+    }
+    .genre-chip:hover, .genre-chip.active {
+      color: var(--text);
+      border-color: var(--gold);
+      background: rgba(201,150,59,.08);
+    }
+    .genre-chip.active { color: var(--gold); }
+
+    /* ── FILTER BAR ────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .type-pills {
+      display: flex;
+      gap: 6px;
+    }
+    .type-pill {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .type-pill.active, .type-pill:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      padding: 0 12px;
+      gap: 8px;
+    }
+    .search-box input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 8px 0;
+      width: 200px;
+    }
+    .search-box input::placeholder { color: var(--muted2); }
+    .search-box button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      transition: color .15s;
+    }
+    .search-box button:hover { color: var(--text); }
+
+    /* ── STAFF PICKS ───────────────────────────────── */
+    .staff-bg {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .staff-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .staff-card {
+      background: var(--bg2);
+      display: flex;
+      gap: 16px;
+      padding: 24px;
+      transition: background .2s;
+    }
+    .staff-card:hover { background: var(--bg3); }
+    .staff-art { flex-shrink: 0; }
+    .staff-body {}
+    .staff-artist { font-size: 11px; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; font-family:'Oswald',sans-serif; }
+    .staff-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--text); line-height: 1; }
+    .staff-quote { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.6; font-style: italic; }
+    .staff-pick-by { font-family: 'Oswald', sans-serif; font-size: 10px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-top: 8px; }
+    .staff-price { font-family: 'Oswald', sans-serif; font-size: 18px; color: var(--text); margin-top: 10px; }
+    .staff-add {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 10px;
+      display: block;
+    }
+    .staff-add:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── ABOUT ─────────────────────────────────────── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .about-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+    .about-h {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px;
+      letter-spacing: 2px;
+      line-height: .95;
+      color: var(--text);
+    }
+    .about-p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.8;
+      margin-top: 20px;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 36px;
+    }
+    .stat {
+      background: var(--bg2);
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .stat-n {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+    .stat-l {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .about-location {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .loc-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .loc-address {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1.5px;
+      line-height: 1.15;
+      color: var(--text);
+    }
+    .loc-detail { font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .loc-map-placeholder {
+      width: 100%;
+      height: 180px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .loc-map-placeholder iframe {
+      width: 100%; height: 100%; border: 0; display: block;
+      filter: grayscale(1) invert(1) contrast(.85);
+    }
+    .loc-btn {
+      display: inline-block;
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 12px 24px;
+      transition: border-color .2s, color .2s;
+    }
+    .loc-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── CONTACT ───────────────────────────────────── */
+    .contact-bg {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) 200px;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .contact-logo-box {
+      background: var(--bg2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .contact-logo-box img {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+    .contact-box {
+      background: var(--bg2);
+      padding: 32px 24px;
+    }
+    .contact-box-icon { font-size: 28px; margin-bottom: 14px; display:block; }
+    .contact-box-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .contact-box-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .contact-box-val a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .contact-box-val a:hover { color: var(--gold); }
+    .hours-table { width: 100%; margin-top: 4px; }
+    .hours-table td {
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      padding: 4px 0;
+      letter-spacing: .5px;
+    }
+    .hours-table td:first-child { color: var(--muted); }
+    .hours-table td:last-child { text-align:right; color: var(--text); }
+    .hours-table .row-closed td { color: var(--muted2) !important; }
+    .hours-table .row-today td { color: var(--red) !important; }
+    .copy-email-small {
+      display: inline-block;
+      margin-top: 8px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .copy-email-small:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── NEWSLETTER ────────────────────────────────── */
+    /* ── EVENTS ─────────────────────────────────────────── */
+    .events-bg {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 8px;
+    }
+    .event-card {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s;
+    }
+    .event-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+    .event-date-block {
+      background: var(--red);
+      color: #fff;
+      min-width: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 12px;
+      flex-shrink: 0;
+    }
+    .event-month {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: .85;
+    }
+    .event-day {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 38px;
+      line-height: 1;
+    }
+    .event-dow {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 1px;
+      opacity: .75;
+      text-transform: uppercase;
+    }
+    .event-body {
+      padding: 16px 18px;
+      flex: 1;
+    }
+    .event-type {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .event-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .event-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .event-meta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .event-meta span {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--muted2);
+      text-transform: uppercase;
+    }
+    .event-meta span strong { color: var(--muted); }
+    .event-rsvp {
+      display: inline-block;
+      margin-top: 10px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--red);
+      border-bottom: 1px solid var(--red);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color .15s, border-color .15s;
+    }
+    .event-rsvp:hover { color: var(--gold); border-color: var(--gold); }
+    .events-empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 13px;
+    }
+
+    .newsletter-bg {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .newsletter-inner {
+      max-width: 560px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 64px 32px;
+    }
+    .newsletter-eyebrow {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .newsletter-h {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      letter-spacing: 2px;
+      color: var(--text);
+    }
+    .newsletter-p { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+    .newsletter-form {
+      display: flex;
+      margin-top: 28px;
+      border: 1px solid var(--border);
+    }
+    .newsletter-form input {
+      flex: 1;
+      background: var(--bg2);
+      border: none;
+      outline: none;
+      padding: 14px 18px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+    }
+    .newsletter-form input::placeholder { color: var(--muted2); }
+    .newsletter-form button {
+      background: var(--red);
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px 28px;
+      border: none;
+      cursor: pointer;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    .newsletter-form button:hover { background: #a00f26; }
+
+    /* ── FOOTER ────────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+    }
+    .footer-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 48px 32px 32px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+    }
+    .footer-brand .fb-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 3px;
+      color: var(--text);
+    }
+    .footer-brand .fb-sub {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .footer-brand .fb-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+      line-height: 1.7;
+    }
+    .footer-brand .fb-social {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .footer-brand .fb-social a {
+      color: var(--muted);
+      font-size: 18px;
+      transition: color .2s;
+      text-decoration: none;
+    }
+    .footer-brand .fb-social a:hover { color: var(--text); }
+    .footer-col h4 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .footer-col a {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 10px;
+      transition: color .2s;
+    }
+    .footer-col a:hover { color: var(--text); }
+    .footer-bottom {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--muted2);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-bottom .test-note { color: var(--red); letter-spacing: 1px; }
+
+    /* ── CART DRAWER ───────────────────────────────── */
+    /* ── CONTACT MODAL ─────────────────────────────────── */
+    .contact-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 600;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .contact-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .contact-modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--red);
+      width: 420px;
+      max-width: 90vw;
+      padding: 40px;
+      position: relative;
+      transform: translateY(-16px);
+      transition: transform .2s;
+    }
+    .contact-modal-overlay.open .contact-modal { transform: translateY(0); }
+    .contact-modal-close {
+      position: absolute; top: 14px; right: 16px;
+      background: none; border: none; color: var(--muted);
+      font-size: 18px; cursor: pointer; line-height: 1;
+      transition: color .15s;
+    }
+    .contact-modal-close:hover { color: var(--text); }
+    .contact-modal h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px; letter-spacing: 2px;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .contact-modal p {
+      font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.6;
+    }
+    .email-copy-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg3); border: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+    .email-copy-row span {
+      flex: 1; font-family: 'Oswald', sans-serif;
+      font-size: 14px; letter-spacing: 1px; color: var(--text);
+    }
+    .email-copy-row button {
+      background: var(--red); color: #fff;
+      font-family: 'Oswald', sans-serif; font-size: 12px;
+      font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      padding: 8px 16px; border: none; cursor: pointer;
+      transition: background .2s; white-space: nowrap;
+    }
+    .email-copy-row button:hover { background: #a00f26; }
+    .contact-modal-links {
+      display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .contact-modal-links a {
+      font-family: 'Oswald', sans-serif; font-size: 12px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      border-bottom: 1px solid var(--muted2); padding-bottom: 2px;
+      transition: color .15s, border-color .15s;
+    }
+    .contact-modal-links a:hover { color: var(--gold); border-color: var(--gold); }
+
+    .drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .drawer {
+      position: fixed;
+      top: 0; right: 0;
+      width: 420px;
+      max-width: 100vw;
+      height: 100vh;
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      z-index: 501;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .drawer-overlay.open .drawer { transform: translateX(0); }
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .drawer-head h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: var(--text);
+    }
+    .drawer-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      transition: color .15s;
+      line-height: 1;
+    }
+    .drawer-close:hover { color: var(--text); }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+    }
+    .drawer-item {
+      display: flex;
+      gap: 14px;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .drawer-item-info { flex: 1; }
+    .di-artist { font-size: 11px; color: var(--muted); text-transform:uppercase; letter-spacing:1px; font-family:'Oswald',sans-serif; }
+    .di-title { font-family: 'Oswald', sans-serif; font-size: 15px; color: var(--text); font-weight: 500; }
+    .di-meta { font-size: 12px; color: var(--muted2); margin-top: 3px; }
+    .di-price { font-family: 'Oswald', sans-serif; font-size: 15px; color: var(--text); margin-top: 6px; }
+    .di-remove {
+      background: none; border: none;
+      color: var(--muted2); font-size: 16px;
+      cursor: pointer; transition: color .15s;
+    }
+    .di-remove:hover { color: var(--red); }
+    .drawer-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      gap: 14px;
+      padding: 40px;
+      text-align: center;
+    }
+    .drawer-empty .ei { font-size: 48px; }
+    .drawer-foot {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .drawer-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Oswald', sans-serif;
+      font-size: 18px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-continue-shopping {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-continue-shopping:hover { border-color: var(--text); color: var(--text); }
+    .btn-checkout-now {
+      background: var(--red);
+      border: 1px solid var(--red);
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 14px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-checkout-now:hover { background: #a00f26; }
+
+    /* ── CART FAB (all devices) ────────────────────── */
+    .mob-cart-fab {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 500;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 13px 22px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(0,0,0,.55);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .mob-cart-fab:not(.hidden) { display: flex; }
+    .mob-cart-fab:hover { transform: scale(1.04); }
+    .mob-cart-fab:active { transform: scale(.95); box-shadow: 0 2px 10px rgba(0,0,0,.4); }
+    .mob-cart-fab svg { flex-shrink: 0; }
+    .mob-cart-fab .fab-count {
+      background: #fff;
+      color: var(--red);
+      font-size: 11px;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px;
+    }
+
+    /* ── FORMAT PICKER MODAL ────────────────────────── */
+    .fmt-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 900;
+      align-items: center;
+      justify-content: center;
+    }
+    .fmt-overlay.open { display: flex; }
+    .fmt-modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--red);
+      padding: 36px 32px 28px;
+      max-width: 360px;
+      width: 92%;
+      text-align: center;
+    }
+    .fmt-modal-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .fmt-modal-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .fmt-modal-artist {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .fmt-btns { display: flex; gap: 12px; }
+    .fmt-btn {
+      flex: 1;
+      padding: 16px 10px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text);
+      font-family: 'Oswald', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .fmt-btn:hover { border-color: var(--red); background: var(--bg4); color: #fff; }
+    .fmt-cancel {
+      display: block;
+      margin: 18px auto 0;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      text-decoration: underline;
+    }
+    .fmt-cancel:hover { color: var(--text); }
+
+    /* ── TOAST ─────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      color: var(--text);
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      letter-spacing: 1px;
+      padding: 14px 24px;
+      z-index: 1000;
+      opacity: 0;
+      transition: transform .3s, opacity .3s;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    /* On mobile, move toast to top so it clears the FAB */
+    @media (hover: none) and (pointer: coarse) {
+      .toast { bottom: auto; top: 80px; transform: translateX(-50%) translateY(-80px); white-space: normal; max-width: min(320px, calc(100vw - 48px)); text-align: center; padding: 10px 16px; font-size: 12px; }
+      .toast.show { transform: translateX(-50%) translateY(0); }
+    }
+
+    /* ── STORE GALLERY ─────────────────────────────── */
+    .store-gallery {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 3px;
+      margin-top: 48px;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      background: var(--bg3);
+      aspect-ratio: 4/3;
+    }
+    .gallery-item:first-child { aspect-ratio: 4/3; }
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease;
+      filter: brightness(.92);
+    }
+    .gallery-item:hover img {
+      transform: scale(1.04);
+      filter: brightness(1);
+    }
+    .gallery-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,.7));
+      padding: 20px 16px 12px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.7);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .gallery-item:hover .gallery-caption { opacity: 1; }
+    .gallery-placeholder {
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted2);
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+      padding: 20px;
+      gap: 10px;
+      border: 1px dashed var(--border);
+    }
+    .gallery-placeholder .ph-icon { font-size: 32px; opacity: .4; }
+
+    /* ── RESPONSIVE ────────────────────────────────── */
+    /* ── HAMBURGER ──────────────────────────────────────── */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--text);
+      transition: all .25s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg);
+      z-index: 400;
+      flex-direction: column;
+      padding: 90px 32px 40px;
+      gap: 0;
+      overflow-y: auto;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 2px;
+      color: var(--text);
+      text-decoration: none;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color .15s;
+    }
+    .mobile-menu a:hover { color: var(--gold); }
+    .mobile-menu .mob-genre-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 24px;
+      margin-bottom: 8px;
+    }
+    .mobile-menu .mob-genres {
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 16px;
+    }
+    .mobile-menu .mob-genres a {
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px; letter-spacing: 1px;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 0;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .mob-close {
+      position: absolute; top: 20px; right: 20px;
+      background: none; border: none;
+      color: var(--muted); font-size: 26px; cursor: pointer;
+    }
+
+    /* ── MOBILE CARD CONTROLS (touch devices only) ── */
+    .card-mob-ctrl { display: none; }
+    @media (hover: none) and (pointer: coarse) {
+      .card-overlay { display: none !important; }
+      .card-mob-ctrl {
+        display: flex;
+        position: absolute;
+        bottom: 8px; right: 8px;
+        z-index: 4;
+        align-items: center;
+        gap: 3px;
+      }
+      .cmob-add {
+        background: var(--red);
+        color: #fff;
+        border: none;
+        width: 34px; height: 34px;
+        font-size: 22px; font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex; align-items: center; justify-content: center;
+        line-height: 1;
+      }
+      .cmob-minus {
+        background: rgba(30,30,30,.92);
+        color: #fff;
+        border: 1px solid var(--border);
+        width: 30px; height: 30px;
+        font-size: 15px;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .cmob-qty {
+        background: rgba(20,20,20,.9);
+        color: var(--text);
+        font-family: 'Oswald', sans-serif;
+        font-size: 14px; font-weight: 600;
+        min-width: 26px; text-align: center;
+        padding: 5px 4px;
+        border-radius: 3px;
+      }
+      .cmob-plus {
+        background: var(--red);
+        color: #fff;
+        border: none;
+        width: 30px; height: 30px;
+        font-size: 18px; font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        display: flex; align-items: center; justify-content: center;
+      }
+    }
+    @media (max-width: 900px) {
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .events-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr 1fr; }
+      .contact-logo-box { display: none; }
+    }
+    @media (max-width: 680px) {
+      .hero-content { padding: 60px 24px; }
+      .hero h1 { font-size: 52px; }
+      .hero-logo-wrap { display: none; }
+      .main-nav { display: none; }
+      .hamburger { display: flex; }
+      .section { padding: 40px 16px; }
+      .section-inner { padding: 0 16px; }
+      .footer-inner { grid-template-columns: 1fr; gap: 32px; }
+      .hours-strip { display: none; }
+      .ship-bar { font-size: 11px; padding: 8px 16px; }
+      .ship-bar .socials { display: none; }
+      .header-inner { padding: 0 16px; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .staff-grid { grid-template-columns: 1fr; }
+      .store-gallery { grid-template-columns: 1fr; }
+      .carousel .product-card { flex: 0 0 180px; }
+      .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 12px; }
+      .newsletter-inner { padding: 40px 16px; }
+      .newsletter-form { flex-direction: column; }
+      .newsletter-form input, .newsletter-form button { width: 100%; }
+      .filter-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .search-box { width: 100%; }
+      .search-box input { width: 100%; }
+      .hero-actions { flex-direction: column; }
+      .btn-red, .btn-ghost { text-align: center; }
+      .event-card { flex-direction: column; }
+      .event-date-block { flex-direction: row; gap: 12px; padding: 10px 16px; min-width: unset; }
+      .event-day { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TEST BANNER -->
+<div class="test-banner">TEST / DEMO WEBSITE — NOT OFFICIAL</div>
+
+<!-- SHIPPING BAR -->
+<div class="ship-bar">
+  <div class="ship-center">
+    <span>Miami, FL</span>
+    <span class="dot">●</span>
+    <a href="tel:7865034127">786-503-4127</a>
+    <span class="dot">●</span>
+    <span>Mon/Thu/Fri 12–6 · Sat 11–6 · Sun 12–5 · Closed Tue–Wed</span>
+  </div>
+  <div class="socials">
+    <a href="https://www.instagram.com/shellshockrecs/" target="_blank" title="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo-wrap">
+      <!-- Generic vinyl logo -->
+      <svg id="logo-svg-fb" class="logo-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="vg" cx="38%" cy="32%" r="70%">
+            <stop offset="0%" stop-color="#2e2e2e"/>
+            <stop offset="100%" stop-color="#080808"/>
+          </radialGradient>
+          <radialGradient id="lg" cx="50%" cy="38%" r="65%">
+            <stop offset="0%" stop-color="#f2e4b0"/>
+            <stop offset="100%" stop-color="#c4982a"/>
+          </radialGradient>
+          <radialGradient id="sheen" cx="30%" cy="25%" r="60%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.06"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- Vinyl body -->
+        <circle cx="120" cy="120" r="118" fill="url(#vg)"/>
+        <!-- Sheen overlay -->
+        <circle cx="120" cy="120" r="118" fill="url(#sheen)"/>
+        <!-- Groove rings -->
+        <circle cx="120" cy="120" r="115" fill="none" stroke="#161616" stroke-width="1.2"/>
+        <circle cx="120" cy="120" r="109" fill="none" stroke="#161616" stroke-width="1"/>
+        <circle cx="120" cy="120" r="103" fill="none" stroke="#161616" stroke-width="1"/>
+        <circle cx="120" cy="120" r="97"  fill="none" stroke="#161616" stroke-width="1"/>
+        <circle cx="120" cy="120" r="91"  fill="none" stroke="#161616" stroke-width="1"/>
+        <circle cx="120" cy="120" r="85"  fill="none" stroke="#161616" stroke-width="1"/>
+        <circle cx="120" cy="120" r="79"  fill="none" stroke="#161616" stroke-width="1"/>
+        <circle cx="120" cy="120" r="73"  fill="none" stroke="#161616" stroke-width="1"/>
+        <circle cx="120" cy="120" r="67"  fill="none" stroke="#161616" stroke-width="1"/>
+        <!-- Center label -->
+        <circle cx="120" cy="120" r="58" fill="url(#lg)"/>
+        <!-- Label outer ring -->
+        <circle cx="120" cy="120" r="57" fill="none" stroke="#7a5010" stroke-width="1.8"/>
+        <!-- Label inner ring -->
+        <circle cx="120" cy="120" r="50" fill="none" stroke="#7a5010" stroke-width="0.8" opacity="0.5"/>
+        <!-- Text arc paths -->
+        <path id="ta" d="M 84,120 A 36,36 0 0,1 156,120" fill="none"/>
+        <path id="ba" d="M 86,127 A 36,36 0 0,0 154,127" fill="none"/>
+        <text font-family="Georgia,'Times New Roman',serif" font-size="12.5" fill="#2a1200" font-weight="bold" letter-spacing="1.2">
+          <textPath href="#ta" startOffset="6%">YOUR STORE</textPath>
+        </text>
+        <text font-family="Georgia,'Times New Roman',serif" font-size="12.5" fill="#2a1200" font-weight="bold" letter-spacing="5">
+          <textPath href="#ba" startOffset="27%">HERE</textPath>
+        </text>
+        <!-- Decorative dash ring on label -->
+        <circle cx="120" cy="120" r="22" fill="none" stroke="#7a5010" stroke-width="1" opacity="0.55"/>
+        <!-- Center hole -->
+        <circle cx="120" cy="120" r="5.5" fill="#080808" stroke="#5a3a08" stroke-width="1.2"/>
+      </svg>
+      <div class="logo-text">
+        <div class="l1">Test Record Store</div>
+        <div class="l2">Vinyl · CDs · Miami</div>
+        <div class="l3">Demo Website</div>
+      </div>
+    </a>
+
+    <nav class="main-nav">
+      <a href="#home">Home</a>
+      <div class="nav-dropdown">
+        <a href="#browse">Browse Genres ▾</a>
+        <div class="dropdown-menu" id="genre-dropdown-menu"></div>
+      </div>
+      <a href="#new-arrivals">New Arrivals</a>
+      <a href="#staff-picks">Staff Picks</a>
+      <a href="#events">Events</a>
+      <a href="#about">About</a>
+      <a href="#contact" onclick="openContactModal(event)">Contact</a>
+    </nav>
+
+    <div class="header-right">
+      <button class="icon-btn" onclick="openCart()" title="Cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-badge" id="cart-count">0</span>
+      </button>
+      <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mob-close" onclick="toggleMobileMenu()">✕</button>
+  <a href="#home" onclick="toggleMobileMenu()">Home</a>
+  <a href="#new-arrivals" onclick="toggleMobileMenu()">New Arrivals</a>
+  <a href="#staff-picks" onclick="toggleMobileMenu()">Staff Picks</a>
+  <a href="#events" onclick="toggleMobileMenu()">Events</a>
+  <a href="#about" onclick="toggleMobileMenu()">About</a>
+  <a href="#contact" onclick="toggleMobileMenu();openContactModal(event)">Contact</a>
+  <div class="mob-genre-label">Browse Genres</div>
+  <div class="mob-genres" id="mob-genres"></div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-logo-wrap" id="hero-logo-wrap">
+    <!-- SVG injected by JS as base layer -->
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Miami's Independent Record Store</div>
+    <h1>Your New<br><span class="red">Record</span><br>Store</h1>
+    <p>Vinyl records, CDs &amp; music across every genre. New, used, rare &amp; hard to find. For music lovers by music lovers.</p>
+    <p style="font-size:11px;letter-spacing:1px;color:var(--muted);margin-top:8px;opacity:.7;">Not affiliated with any existing business — this is a demo website.</p>
+    <div class="hero-actions">
+      <a href="#new-arrivals" class="btn-red">New Arrivals</a>
+      <a href="#browse" class="btn-ghost">Browse Genres</a>
+    </div>
+  </div>
+</section>
+
+<!-- NOW PLAYING -->
+
+<!-- HOURS -->
+<div class="hours-strip" id="hours-strip">
+  <div class="hours-item" id="h-mon"><div class="hours-day">Mon</div><div class="hours-time">12 – 6 PM</div></div>
+  <div class="hours-item closed"><div class="hours-day">Tue</div><div class="hours-time">Closed</div></div>
+  <div class="hours-item closed"><div class="hours-day">Wed</div><div class="hours-time">Closed</div></div>
+  <div class="hours-item" id="h-thu"><div class="hours-day">Thu</div><div class="hours-time">12 – 6 PM</div></div>
+  <div class="hours-item" id="h-fri"><div class="hours-day">Fri</div><div class="hours-time">12 – 6 PM</div></div>
+  <div class="hours-item" id="h-sat"><div class="hours-day">Sat</div><div class="hours-time">11 AM – 6 PM</div></div>
+  <div class="hours-item" id="h-sun"><div class="hours-day">Sun</div><div class="hours-time">12 – 5 PM</div></div>
+</div>
+
+<!-- NEW ARRIVALS carousel -->
+<div class="section-full" id="new-arrivals" style="background:var(--bg);">
+  <div class="section-inner">
+    <div class="section-head">
+      <h2>New Arrivals</h2>
+      <a href="#products" onclick="event.preventDefault();setGenre('all');document.getElementById('products').scrollIntoView({behavior:'smooth'})">View All →</a>
+    </div>
+    <div class="carousel-wrap">
+      <button class="carousel-btn prev" onclick="scrollCarousel('new-carousel',-1)">‹</button>
+      <div class="carousel" id="new-carousel"></div>
+      <button class="carousel-btn next" onclick="scrollCarousel('new-carousel',1)">›</button>
+    </div>
+  </div>
+</div>
+
+<!-- BROWSE GENRES -->
+<div class="genres-bg" id="browse">
+  <div class="section">
+    <div class="section-head">
+      <h2>Browse Genres</h2>
+    </div>
+    <div class="genre-chips" id="genre-chips"></div>
+  </div>
+</div>
+
+<!-- ALL PRODUCTS -->
+<div id="products" style="background:var(--bg);scroll-margin-top:90px;">
+  <div class="section">
+    <div class="section-head">
+      <h2 id="products-h">All Records &amp; CDs</h2>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-label" id="showing-label">Showing all items</span>
+      <div class="type-pills">
+        <button class="type-pill active" onclick="setType('all',this)">All</button>
+        <button class="type-pill" onclick="setType('vinyl',this)">Vinyl</button>
+        <button class="type-pill" onclick="setType('cd',this)">CDs</button>
+      </div>
+      <div class="search-box">
+        <button><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+        <input type="text" id="search-input" placeholder="Search title or artist…" oninput="renderProducts()"/>
+      </div>
+    </div>
+    <div class="product-grid" id="product-grid"></div>
+  </div>
+</div>
+
+<!-- STAFF PICKS -->
+<div class="staff-bg section-full" id="staff-picks">
+  <div class="section-inner">
+    <div class="section-head" style="margin-bottom:0;padding-bottom:28px;border-bottom:1px solid var(--border);">
+      <h2>Staff Picks</h2>
+      <span style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);">What we're spinning this week</span>
+    </div>
+    <div class="staff-grid" id="staff-grid"></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about" style="background:var(--bg);">
+  <div class="section">
+    <div class="about-grid">
+      <div>
+        <div class="about-label">About the Store</div>
+        <div class="about-h">Your New Independent Record Store</div>
+        <p class="about-p">Located in the heart of Fort Lauderdale, Test Record Store is your destination for vinyl records and CDs spanning every genre — from classic jazz and soul to heavy metal and hip-hop. We're passionate about music and committed to keeping physical music alive.</p>
+        <p class="about-p" style="margin-top:12px;">Whether you're a seasoned collector or just discovering the warmth of vinyl, our knowledgeable staff is here to help you find your next favorite record. Stop in, flip through the crates, and stay a while.</p>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-n">300+</div><div class="stat-l">Vinyl</div></div>
+          <div class="stat"><div class="stat-n">100+</div><div class="stat-l">CDs</div></div>
+          <div class="stat"><div class="stat-n">10+</div><div class="stat-l">Genres</div></div>
+          <div class="stat"><div class="stat-n">5★</div><div class="stat-l">Rated</div></div>
+        </div>
+      </div>
+      <div class="about-location">
+        <div class="loc-label">Find Us</div>
+        <div class="loc-address">2847 NW 36th Avenue<br>Miami<br>Florida 33142</div>
+        <div class="loc-map-placeholder">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3593.2!2d-80.2301!3d25.8009!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b8a0e1e1e1e1%3A0xb2b3c4d5e6f7a8b9!2s2847+NW+36th+Ave%2C+Miami%2C+FL+33142!5e0!3m2!1sen!2sus!4v1"
+            allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+        <div class="loc-detail">Near Wynwood Arts District · Free street parking available</div>
+        <a class="loc-btn" href="https://maps.google.com/?q=2847+NW+36th+Avenue+Miami+FL+33142" target="_blank">Get Directions →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STORE PHOTO GALLERY REMOVED -->
+
+<!-- CONTACT -->
+<div class="contact-bg" id="contact">
+  <div class="section">
+    <div class="section-head" style="margin-bottom:24px;">
+      <h2>Contact</h2>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-box">
+        <span class="contact-box-icon"></span>
+        <div class="contact-box-label">Phone</div>
+        <div class="contact-box-val"><a href="tel:7865034127">786-503-4127</a></div>
+      </div>
+      <div class="contact-box">
+        <span class="contact-box-icon"></span>
+        <div class="contact-box-label">Email</div>
+        <div class="contact-box-val"><a href="mailto:info@testrecordstore.com">info@testrecordstore.com</a></div>
+        <button class="copy-email-small" onclick="copyEmail()">Copy Address</button>
+      </div>
+      <div class="contact-box">
+        <span class="contact-box-icon"></span>
+        <div class="contact-box-label">Hours</div>
+        <table class="hours-table">
+          <tr id="ct-mon"><td>Monday</td><td>12–6 PM</td></tr>
+          <tr class="row-closed"><td>Tue–Wed</td><td>Closed</td></tr>
+          <tr id="ct-thu"><td>Thursday</td><td>12–6 PM</td></tr>
+          <tr id="ct-fri"><td>Friday</td><td>12–6 PM</td></tr>
+          <tr id="ct-sat"><td>Saturday</td><td>11–6 PM</td></tr>
+          <tr id="ct-sun"><td>Sunday</td><td>12–5 PM</td></tr>
+        </table>
+      </div>
+      <div class="contact-box">
+        <span class="contact-box-icon"></span>
+        <div class="contact-box-label">Location</div>
+        <div class="contact-box-val">2847 NW 36th Ave<br>Miami, FL 33142</div>
+        <a href="https://www.instagram.com/shellshockrecs/" target="_blank" style="display:block;margin-top:14px;font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--muted)'">Instagram →</a>
+      </div>
+      <!-- Map spans full width below the 5 boxes -->
+      <div style="grid-column:1/-1;border:1px solid var(--border);overflow:hidden;height:240px;">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3593.2!2d-80.2301!3d25.8009!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b8a0e1e1e1e1%3A0xb2b3c4d5e6f7a8b9!2s2847+NW+36th+Ave%2C+Miami%2C+FL+33142!5e0!3m2!1sen!2sus!4v1"
+          width="100%" height="100%" style="border:0;display:block;filter:grayscale(1) invert(1) contrast(.85);"
+          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEWSLETTER -->
+<!-- EVENTS -->
+<div class="events-bg" id="events" style="scroll-margin-top:90px;">
+  <div class="section">
+    <div class="section-head">
+      <h2>Upcoming Events</h2>
+      <span style="font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">In-Store · Fort Lauderdale</span>
+    </div>
+    <div class="events-grid" id="events-grid"></div>
+  </div>
+</div>
+
+<div class="newsletter-bg">
+  <div class="newsletter-inner">
+    <div class="newsletter-eyebrow">Stay In The Loop</div>
+    <div class="newsletter-h">New Drops.<br>Exclusive Deals.</div>
+    <p class="newsletter-p">Sign up and be the first to know about new arrivals, in-store events, and exclusive offers.</p>
+    <form class="newsletter-form" onsubmit="handleNews(event)">
+      <input type="email" placeholder="your@email.com" required/>
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="fb-name">Test Record Store</div>
+      <div class="fb-sub">Fort Lauderdale · Florida</div>
+      <p class="fb-desc">Your new independent record store. Vinyl records, CDs, and music across all genres. For music lovers by music lovers.</p>
+      <div class="fb-social">
+        <a href="https://www.instagram.com/shellshockrecs/" target="_blank" title="Instagram">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Shop</h4>
+      <a href="#new-arrivals">New Arrivals</a>
+      <a href="#staff-picks">Staff Picks</a>
+      <a href="#browse">All Genres</a>
+    </div>
+    <div class="footer-col">
+      <h4>Info</h4>
+      <a href="#about">About Us</a>
+      <a href="#contact">Contact</a>
+      <a href="#contact">Store Hours</a>
+    </div>
+    <div class="footer-col">
+      <h4>Connect</h4>
+      <a href="https://www.instagram.com/shellshockrecs/" target="_blank">Instagram</a>
+      <a href="tel:7865034127">786-503-4127</a>
+      <a href="mailto:info@testrecordstore.com">Email Us</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Test Record Store Demo. All rights reserved.</span>
+    <span class="test-note">DEMO WEBSITE — NOT OFFICIAL</span>
+  </div>
+</footer>
+
+<!-- CART DRAWER -->
+<!-- Contact Modal -->
+<div class="contact-modal-overlay" id="contact-modal-overlay" onclick="contactOverlayClick(event)">
+  <div class="contact-modal">
+    <button class="contact-modal-close" onclick="closeContactModal()">✕</button>
+    <h3>Contact Us</h3>
+    <p>Have a question about an order, looking for a specific record, or just want to say hi? Drop us a line.</p>
+    <div class="email-copy-row">
+      <span>info@shellshockrecords.com</span>
+      <button onclick="copyContactEmail(this)">Copy Email</button>
+    </div>
+    <div class="contact-modal-links">
+      <a href="tel:7865034127">786-503-4127</a>
+      <a href="https://www.instagram.com/shellshockrecordsfl/" target="_blank">Instagram →</a>
+      <a href="#contact" onclick="closeContactModal()">Full Contact Info →</a>
+    </div>
+  </div>
+</div>
+
+<div class="drawer-overlay" id="cart-overlay" onclick="overlayClick(event)">
+  <div class="drawer">
+    <div class="drawer-head">
+      <h3>Your Cart</h3>
+      <button class="drawer-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <div class="drawer-foot" id="drawer-foot" style="display:none;">
+      <div class="drawer-total"><span>Total</span><span id="drawer-total">$0.00</span></div>
+      <div class="drawer-actions">
+        <button class="btn-continue-shopping" onclick="closeCart()">← Continue</button>
+        <button class="btn-checkout-now" onclick="checkout()">Checkout →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+<div class="fmt-overlay" id="fmt-overlay" onclick="if(event.target===this)closeFmtModal()">
+  <div class="fmt-modal">
+    <div class="fmt-modal-label">Available In</div>
+    <div class="fmt-modal-title" id="fmt-modal-title"></div>
+    <div class="fmt-modal-artist" id="fmt-modal-artist"></div>
+    <div class="fmt-btns">
+      <button class="fmt-btn" id="fmt-btn-cd" onclick="selectFmt('cd')">CD</button>
+      <button class="fmt-btn" id="fmt-btn-vinyl" onclick="selectFmt('vinyl')">Vinyl LP</button>
+    </div>
+    <button class="fmt-cancel" onclick="closeFmtModal()">Cancel</button>
+  </div>
+</div>
+<button class="mob-cart-fab hidden" id="mob-cart-fab" onclick="openCart()" aria-label="Open cart">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+  Cart
+  <span class="fab-count" id="mob-fab-count">0</span>
+</button>
+
+<script>
+/* ─── DATA ──────────────────────────────────────────── */
+const genres = [
+  {id:'jazz',icon:'',name:'Jazz'},
+  {id:'metal',icon:'',name:'Metal'},
+  {id:'rnb',icon:'',name:'R&B / Soul'},
+  {id:'rap',icon:'',name:'Rap / Hip-Hop'},
+  {id:'rock',icon:'',name:'Rock'},
+  {id:'pop',icon:'',name:'Pop'},
+  {id:'country',icon:'',name:'Country'},
+  {id:'electronic',icon:'',name:'Electronic'},
+  {id:'classical',icon:'',name:'Classical'},
+  {id:'blues',icon:'',name:'Blues'},
+  {id:'reggae',icon:'',name:'Reggae'},
+  {id:'punk',icon:'',name:'Punk'},
+];
+
+const products = [
+  {id:1, title:'Kind of Blue',artist:'Miles Davis',genre:'jazz',type:'vinyl',price:24.99,badge:'staff',c:'#0d2240',l:'#2a5a8a',localArt:'album covers/art-kind-of-blue.jpg'},
+  {id:2, title:'A Love Supreme',artist:'John Coltrane',genre:'jazz',type:'vinyl',price:29.99,badge:'rare',c:'#1d0d2e',l:'#5a3880',localArt:'album covers/art-a-love-supreme.jpg'},
+  {id:3, title:'Time Out',artist:'Dave Brubeck Quartet',genre:'jazz',type:'cd',price:14.99,badge:'sale',c:'#0d2018',l:'#256842',localArt:'album covers/art-time-out.jpg'},
+  {id:4, title:'Bitches Brew',artist:'Miles Davis',genre:'jazz',type:'vinyl',price:34.99,badge:'new',c:'#241400',l:'#8a5a00',localArt:'album covers/art-bitches-brew.jpg'},
+  {id:5, title:'Master of Puppets',artist:'Metallica',genre:'metal',type:'vinyl',price:39.99,badge:'staff',c:'#1a0000',l:'#7a0010',localArt:'album covers/art-master-of-puppets.jpg'},
+  {id:6, title:'Black Sabbath',artist:'Black Sabbath',genre:'metal',type:'vinyl',price:34.99,badge:'',c:'#0a0a0a',l:'#333',localArt:'album covers/art-black-sabbath.jpg'},
+  {id:7, title:'Paranoid',artist:'Black Sabbath',genre:'metal',type:'vinyl',hasBoth:true,price:32.99,priceVinyl:32.99,priceCd:13.99,badge:'new',c:'#060618',l:'#20207a',localArt:'album covers/art-paranoid.jpg'},
+  {id:9, title:'Reign in Blood',artist:'Slayer',genre:'metal',type:'vinyl',price:29.99,badge:'rare',c:'#1e0000',l:'#7a0000',localArt:'album covers/art-reign-in-blood.jpg'},
+  {id:10,title:"What's Going On",artist:'Marvin Gaye',genre:'rnb',type:'vinyl',price:27.99,badge:'staff',c:'#120822',l:'#4a1e7a',localArt:'album covers/art-whats-going-on.jpg'},
+  {id:11,title:'Purple Rain',artist:'Prince',genre:'rnb',type:'vinyl',hasBoth:true,price:32.99,priceVinyl:32.99,priceCd:13.99,badge:'',c:'#0e0022',l:'#5500aa',localArt:'album covers/art-purple-rain.jpg'},
+  {id:12,title:'Songs in the Key of Life',artist:'Stevie Wonder',genre:'rnb',type:'vinyl',price:44.99,badge:'new',c:'#081408',l:'#226622',localArt:'album covers/art-songs-in-the-key.jpg'},
+  {id:13,title:'Off the Wall',artist:'Michael Jackson',genre:'rnb',type:'cd',price:13.99,badge:'',c:'#06060e',l:'#18185a',localArt:'album covers/art-off-the-wall.jpg'},
+  {id:14,title:'The Chronic',artist:'Dr. Dre',genre:'rap',type:'vinyl',price:36.99,badge:'staff',c:'#060e06',l:'#124a12',localArt:'album covers/art-the-chronic.jpg'},
+  {id:15,title:'Illmatic',artist:'Nas',genre:'rap',type:'vinyl',hasBoth:true,price:29.99,priceVinyl:29.99,priceCd:12.99,badge:'rare',c:'#0a0a06',l:'#3a3a0a',localArt:'album covers/art-illmatic.jpg'},
+  {id:16,title:'Ready to Die',artist:'The Notorious B.I.G.',genre:'rap',type:'vinyl',price:34.99,badge:'new',c:'#080808',l:'#282828',localArt:'album covers/art-ready-to-die.jpg'},
+{id:18,title:'Abbey Road',artist:'The Beatles',genre:'rock',type:'vinyl',hasBoth:true,price:32.99,priceVinyl:32.99,priceCd:14.99,badge:'staff',c:'#0e0e0e',l:'#444',localArt:'album covers/art-abbey-road.jpg'},
+  {id:19,title:'Led Zeppelin IV',artist:'Led Zeppelin',genre:'rock',type:'vinyl',price:34.99,badge:'rare',c:'#0e0606',l:'#6a1a06',localArt:'album covers/art-led-zeppelin-iv.jpg'},
+  {id:20,title:'Rumours',artist:'Fleetwood Mac',genre:'rock',type:'vinyl',price:28.99,badge:'new',c:'#06101a',l:'#1a4a6a',localArt:'album covers/art-rumours.jpg'},
+  {id:21,title:'Dark Side of the Moon',artist:'Pink Floyd',genre:'rock',type:'vinyl',hasBoth:true,price:36.99,priceVinyl:36.99,priceCd:14.99,badge:'sale',c:'#04040a',l:'#14142a',localArt:'album covers/art-dark-side.jpg'},
+  {id:22,title:'Thriller',artist:'Michael Jackson',genre:'pop',type:'vinyl',hasBoth:true,price:29.99,priceVinyl:29.99,priceCd:13.99,badge:'',c:'#060606',l:'#222',localArt:'album covers/art-thriller.jpg'},
+  {id:23,title:'1989',artist:'Taylor Swift',genre:'pop',type:'vinyl',price:32.99,badge:'new',c:'#0a0a12',l:'#303060',localArt:'album covers/art-1989.jpg'},
+  {id:24,title:'Coat of Many Colors',artist:'Dolly Parton',genre:'country',type:'vinyl',price:26.99,badge:'',c:'#0e0806',l:'#5a2a06',localArt:'album covers/art-coat-of-many-colors.jpg'},
+  {id:25,title:'At Folsom Prison',artist:'Johnny Cash',genre:'country',type:'vinyl',price:28.99,badge:'staff',c:'#040404',l:'#181818',localArt:'album covers/art-at-folsom-prison.jpg'},
+  {id:26,title:'Random Access Memories',artist:'Daft Punk',genre:'electronic',type:'vinyl',price:44.99,badge:'new',c:'#0e0c00',l:'#4a4000',localArt:'album covers/art-random-access.jpg'},
+  {id:27,title:'Homework',artist:'Daft Punk',genre:'electronic',type:'vinyl',price:36.99,badge:'',c:'#06060e',l:'#20206a',localArt:'album covers/art-homework.jpg'},
+  {id:28,title:'The Thrill Is Gone',artist:'B.B. King',genre:'blues',type:'vinyl',price:24.99,badge:'',c:'#06060e',l:'#12124a',localArt:'album covers/art-thrill-is-gone.jpg'},
+  {id:29,title:'Exodus',artist:'Bob Marley & The Wailers',genre:'reggae',type:'vinyl',price:26.99,badge:'staff',c:'#060e06',l:'#124a12',localArt:'album covers/art-exodus.png'},
+  {id:30,title:'Never Mind the Bollocks',artist:'Sex Pistols',genre:'punk',type:'vinyl',price:26.99,badge:'new',c:'#0e0000',l:'#6a0000',localArt:'album covers/art-bullocks.jpg'},
+  {id:31,title:'The Four Seasons',artist:'Vivaldi / I. Perlman',genre:'classical',type:'vinyl',price:22.99,badge:'rare',c:'#0e0c00',l:'#4a3a00',localArt:'album covers/art-four-seasons.jpg'},
+  {id:32,title:'Scream Bloody Gore',artist:'Death',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#1a0000',l:'#8a0000',localArt:'album covers/art-scream-bloody-gore.jpg'},
+  {id:33,title:'Leprosy',artist:'Death',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#0a0800',l:'#3a2800',localArt:'album covers/art-leprosy.jpg'},
+  {id:34,title:'Spiritual Healing',artist:'Death',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#080e08',l:'#1a3a1a',localArt:'album covers/art-spiritual-healing.jpg'},
+  {id:35,title:'Human',artist:'Death',genre:'metal',type:'vinyl',hasBoth:true,price:36.99,priceVinyl:36.99,priceCd:14.99,badge:'staff',c:'#060a10',l:'#182040',localArt:'album covers/art-human.jpg'},
+  {id:36,title:'Individual Thought Patterns',artist:'Death',genre:'metal',type:'vinyl',price:32.99,badge:'',c:'#0e0806',l:'#4a2806',localArt:'album covers/art-individual-thought.jpg'},
+  {id:37,title:'Symbolic',artist:'Death',genre:'metal',type:'vinyl',hasBoth:true,price:34.99,priceVinyl:34.99,priceCd:13.99,badge:'staff',c:'#0a0a0a',l:'#2a2a2a',localArt:'album covers/art-symbolic.jpg'},
+  {id:38,title:'The Sound of Perseverance',artist:'Death',genre:'metal',type:'cd',price:13.99,badge:'new',c:'#080808',l:'#202020',localArt:'album covers/art-sound-of-perseverance.jpg'},
+  {id:39,title:'Hymns from the Apocrypha',artist:'Suffocation',genre:'metal',type:'vinyl',price:29.99,badge:'new',c:'#0e0606',l:'#4a1206',localArt:'album covers/art-hymns-from.jpg'},
+  {id:40,title:'Eaten Back to Life',artist:'Cannibal Corpse',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#1a0000',l:'#8a0000',localArt:'album covers/art-eaten-back-to-life.jpg'},
+  {id:41,title:'Butchered at Birth',artist:'Cannibal Corpse',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#0a0000',l:'#5a0000',localArt:'album covers/art-butchered-at-birth.jpg'},
+  {id:42,title:'Tomb of the Mutilated',artist:'Cannibal Corpse',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#080808',l:'#1a1a1a',localArt:'album covers/art-tomb-of-the-mutilated.jpg'},
+  {id:45,title:'Gallery of Suicide',artist:'Cannibal Corpse',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#0e0000',l:'#5a0000',localArt:'album covers/art-gallery-of-suicide.jpg'},
+  {id:46,title:'Bloodthirst',artist:'Cannibal Corpse',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#1a0000',l:'#7a0000',localArt:'album covers/art-bloodthirst.jpg'},
+  {id:49,title:'Kill',artist:'Cannibal Corpse',genre:'metal',type:'cd',price:13.99,badge:'staff',c:'#0a0a0a',l:'#2a2a2a',localArt:'album covers/art-kill.jpg'},
+  {id:52,title:'A Skeletal Domain',artist:'Cannibal Corpse',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#080808',l:'#202020',localArt:'album covers/art-a-skeletal-domain.jpg'},
+  {id:53,title:'Red Before Black',artist:'Cannibal Corpse',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#1a0000',l:'#8a0000',localArt:'album covers/art-red-before-black.jpg'},
+  {id:55,title:'Chaos Horrific',artist:'Cannibal Corpse',genre:'metal',type:'vinyl',price:29.99,badge:'new',c:'#0a0000',l:'#4a0000',localArt:'album covers/art-chaos-horrific.jpg'},
+  {id:56,title:'Purification Through Violence',artist:'Dying Fetus',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#1a0000',l:'#8a0000',localArt:'album covers/art-purification-through-violence.jpg'},
+  {id:57,title:'Killing on Adrenaline',artist:'Dying Fetus',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#0e0000',l:'#5a0000',localArt:'album covers/art-killing-on-adrenaline.jpg'},
+  {id:58,title:'Destroy the Opposition',artist:'Dying Fetus',genre:'metal',type:'vinyl',price:32.99,badge:'staff',c:'#0a0a00',l:'#3a2000',localArt:'album covers/art-destroy-the-opposition.jpg'},
+  {id:59,title:'Stop at Nothing',artist:'Dying Fetus',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#060606',l:'#1e1e1e',localArt:'album covers/art-stop-at-nothing.jpg'},
+  {id:60,title:'War of Attrition',artist:'Dying Fetus',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#0e0600',l:'#3a1800',localArt:'album covers/art-war-of-attrition.jpg'},
+  {id:61,title:'Descend into Depravity',artist:'Dying Fetus',genre:'metal',type:'vinyl',price:29.99,badge:'',c:'#060e0e',l:'#1a3a3a',localArt:'album covers/art-descend-into-depravity.jpg'},
+  {id:63,title:'Wrong One to Fuck With',artist:'Dying Fetus',genre:'metal',type:'vinyl',price:32.99,badge:'staff',c:'#0e0000',l:'#5a0000',localArt:'album covers/art-wrong-one-to-fuck-with.jpg'},
+  {id:64,title:'Make Them Beg for Death',artist:'Dying Fetus',genre:'metal',type:'cd',price:13.99,badge:'new',c:'#1a0000',l:'#7a0000',localArt:'album covers/art-make-them-beg-for-death.jpg'},
+  {id:65,title:'Master of Reality',artist:'Black Sabbath',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#080a00',l:'#1e2800',localArt:'album covers/art-master-of-reality.jpg'},
+  {id:66,title:'Black Sabbath, Vol. 4',artist:'Black Sabbath',genre:'metal',type:'cd',price:13.99,badge:'rare',c:'#0a0000',l:'#3a0000',localArt:'album covers/art-vol-4.jpg'},
+  {id:67,title:'Sabbath Bloody Sabbath',artist:'Black Sabbath',genre:'metal',type:'vinyl',hasBoth:true,price:32.99,priceVinyl:32.99,priceCd:13.99,badge:'staff',c:'#0e0808',l:'#3a1818',localArt:'album covers/art-sabbath-bloody-sabbath.jpg'},
+  {id:68,title:'Heaven and Hell',artist:'Black Sabbath',genre:'metal',type:'vinyl',price:32.99,badge:'staff',c:'#060610',l:'#1a1a40',localArt:'album covers/art-heaven-and-hell.jpg'},
+  {id:69,title:'Sonic Brew',artist:'Black Label Society',genre:'metal',type:'vinyl',price:28.99,badge:'rare',c:'#0a0400',l:'#3a1800',localArt:'album covers/art-sonic-brew.jpg'},
+  {id:70,title:'Stronger Than Death',artist:'Black Label Society',genre:'metal',type:'vinyl',price:28.99,badge:'',c:'#080808',l:'#222222',localArt:'album covers/art-stronger-than-death.jpg'},
+  {id:71,title:'Mafia',artist:'Black Label Society',genre:'metal',type:'vinyl',hasBoth:true,price:28.99,priceVinyl:28.99,priceCd:12.99,badge:'staff',c:'#0a0000',l:'#3a0000',localArt:'album covers/art-mafia.jpg'},
+  {id:72,title:'Order of the Black',artist:'Black Label Society',genre:'metal',type:'vinyl',price:28.99,badge:'',c:'#040404',l:'#141414',localArt:'album covers/art-order-of-the-black.jpg'},
+  {id:73,title:'Doom Crew Inc.',artist:'Black Label Society',genre:'metal',type:'vinyl',price:28.99,badge:'new',c:'#0e0800',l:'#3a2000',localArt:'album covers/art-doom-crew-inc.jpg'},
+  {id:74,title:'thank u, next',artist:'Ariana Grande',genre:'pop',type:'cd',price:13.99,badge:'new',c:'#0a0206',l:'#3a0a1e',localArt:'album covers/art-thank-u-next.jpg'},
+  {id:75,title:'eternal sunshine',artist:'Ariana Grande',genre:'pop',type:'cd',price:13.99,badge:'new',c:'#0e0a02',l:'#3a2e0a',localArt:'album covers/art-eternal-sunshine.jpg'},
+  {id:76,title:'Sonic Excess in Its Purest Form',artist:'Crowbar',genre:'metal',type:'vinyl',price:26.99,badge:'',c:'#080a08',l:'#1e281e',localArt:'album covers/art-sonic-excess.jpg'},
+  {id:77,title:'Time Heals Nothing',artist:'Crowbar',genre:'metal',type:'vinyl',price:26.99,badge:'',c:'#060608',l:'#141420',localArt:'album covers/art-time-heals-nothing.jpg'},
+  {id:78,title:'Odd Fellows Rest',artist:'Crowbar',genre:'metal',type:'cd',price:12.99,badge:'rare',c:'#080808',l:'#202020',localArt:'album covers/art-odd-fellows-rest.jpg'},
+  {id:79,title:'good kid, m.A.A.d city',artist:'Kendrick Lamar',genre:'rap',type:'vinyl',price:34.99,badge:'staff',c:'#060a0e',l:'#0a1a2e'},
+  {id:80,title:'Enter the Wu-Tang (36 Chambers)',artist:'Wu-Tang Clan',genre:'rap',type:'vinyl',price:36.99,badge:'rare',c:'#0a0c04',l:'#2a3008'},
+  {id:81,title:'Reasonable Doubt',artist:'Jay-Z',genre:'rap',type:'vinyl',price:39.99,badge:'rare',c:'#08080e',l:'#1a1a3a'},
+  {id:83,title:'The Marshall Mathers LP',artist:'Eminem',genre:'rap',type:'vinyl',price:32.99,badge:'staff',c:'#0a0a0a',l:'#282828'},
+];
+
+const staffPicks = [
+  {id:1, title:'Kind of Blue',artist:'Miles Davis',quote:'"Absolute masterpiece. Play it on vinyl and you\'ll hear details you never noticed before."',by:'Alex, Floor Manager',price:24.99,c:'#0d2240',l:'#2a5a8a'},
+  {id:14,title:'The Chronic',artist:'Dr. Dre',quote:'"The production on this is still unmatched 30 years later. A must-own on wax."',by:'Marcus, Vinyl Specialist',price:36.99,c:'#060e06',l:'#124a12'},
+  {id:25,title:'At Folsom Prison',artist:'Johnny Cash',quote:'"Nothing hits like Johnny performing for actual inmates. The energy is electric."',by:'Dana, CD Curator',price:28.99,c:'#040404',l:'#181818'},
+  {id:26,title:'Random Access Memories',artist:'Daft Punk',quote:'"Audiophile-grade production that shows off any record player. One of the best sounding LPs ever pressed."',by:'Toni, Electronics Buyer',price:44.99,c:'#0e0c00',l:'#4a4000'},
+];
+
+const nowPlaying = [
+  'Kind of Blue — Miles Davis',
+  'Master of Puppets — Metallica',
+  "What's Going On — Marvin Gaye",
+  'Illmatic — Nas',
+  'Abbey Road — The Beatles',
+  'Exodus — Bob Marley',
+  'Random Access Memories — Daft Punk',
+  'Dark Side of the Moon — Pink Floyd',
+];
+
+/* ─── STATE ─────────────────────────────────────────── */
+let cart = [];
+let activeGenre = 'all';
+let activeType  = 'all';
+
+/* ─── SVG HELPERS ───────────────────────────────────── */
+function vinylSVG(c,l,size=200){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="${c}"/>
+    <circle cx="100" cy="100" r="96" fill="${c}"/>
+    <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="2"/>
+    <circle cx="100" cy="100" r="76" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="2"/>
+    <circle cx="100" cy="100" r="64" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="2"/>
+    <circle cx="100" cy="100" r="52" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="2"/>
+    <circle cx="100" cy="100" r="40" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="2"/>
+    <circle cx="100" cy="100" r="34" fill="${l}"/>
+    <circle cx="100" cy="100" r="7"  fill="${c}"/>
+  </svg>`;
+}
+
+function cdSVG(size=200){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="cdg${size}" cx="50%" cy="50%" r="50%">
+        <stop offset="0%"   stop-color="#d0d8e8"/>
+        <stop offset="30%"  stop-color="#b0b8d0"/>
+        <stop offset="55%"  stop-color="#c8b0b0"/>
+        <stop offset="75%"  stop-color="#b0c8b0"/>
+        <stop offset="100%" stop-color="#a8a8c8"/>
+      </radialGradient>
+    </defs>
+    <rect width="200" height="200" fill="#111"/>
+    <circle cx="100" cy="100" r="95" fill="url(#cdg${size})"/>
+    <circle cx="100" cy="100" r="30" fill="rgba(255,255,255,.4)" stroke="rgba(0,0,0,.1)" stroke-width="1"/>
+    <circle cx="100" cy="100" r="10" fill="#bbb"/>
+    <circle cx="100" cy="100" r="4"  fill="#888"/>
+  </svg>`;
+}
+
+/* ─── INIT GENRE DROPDOWN ───────────────────────────── */
+function initGenreDropdown(){
+  const menu = document.getElementById('genre-dropdown-menu');
+  if(!menu) return;
+  const saleCnt = products.filter(p=>p.badge==='sale').length;
+  const rareCnt = products.filter(p=>p.badge==='rare').length;
+  const special = [
+    `<a href="#products" onclick="event.preventDefault();setGenre('sale')">On Sale (${saleCnt})</a>`,
+    `<a href="#products" onclick="event.preventDefault();setGenre('rare')">Rare (${rareCnt})</a>`,
+  ].join('');
+  menu.innerHTML = special + genres.map(g=>
+    `<a href="#products" onclick="event.preventDefault();setGenre('${g.id}')">${g.name}</a>`
+  ).join('');
+}
+
+/* ─── GENRE CHIPS ───────────────────────────────────── */
+function renderGenreChips(){
+  const el = document.getElementById('genre-chips');
+  const saleCnt = products.filter(p=>p.badge==='sale').length;
+  const rareCnt = products.filter(p=>p.badge==='rare').length;
+  const allChip = `<button class="genre-chip ${activeGenre==='all'?'active':''}" onclick="setGenre('all')">All (${products.length})</button>`;
+  const saleChip = `<button class="genre-chip sale-chip ${activeGenre==='sale'?'active':''}" onclick="setGenre('sale')">On Sale (${saleCnt})</button>`;
+  const rareChip = `<button class="genre-chip rare-chip ${activeGenre==='rare'?'active':''}" onclick="setGenre('rare')">Rare (${rareCnt})</button>`;
+  el.innerHTML = allChip + saleChip + rareChip + genres.map(g=>{
+    const cnt = products.filter(p=>p.genre===g.id).length;
+    return `<button class="genre-chip ${activeGenre===g.id?'active':''}" onclick="setGenre('${g.id}')">${g.name} (${cnt})</button>`;
+  }).join('');
+}
+
+/* ─── PRODUCTS ──────────────────────────────────────── */
+function renderProducts(){
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  let list = products.filter(p=>{
+    if(activeGenre==='sale' && p.badge!=='sale') return false;
+    if(activeGenre==='rare' && p.badge!=='rare') return false;
+    if(activeGenre!=='all' && activeGenre!=='sale' && activeGenre!=='rare' && p.genre!==activeGenre) return false;
+    if(activeType !=='all' && p.type !==activeType && !p.hasBoth) return false;
+    if(q && !p.title.toLowerCase().includes(q) && !p.artist.toLowerCase().includes(q)) return false;
+    return true;
+  }).sort((a,b)=>a.artist.localeCompare(b.artist));
+  document.getElementById('showing-label').textContent=`Showing ${list.length} item${list.length!==1?'s':''}`;
+  document.getElementById('product-grid').innerHTML = list.length
+    ? list.map(p=>cardHTML(p,'grid')).join('')
+    : `<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--muted);">
+        <p style="font-family:'Oswald',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:14px;color:var(--muted);margin-top:60px;">No results found</p>
+      </div>`;
+  renderAllMobCtrls();
+}
+
+function renderNewArrivals(){
+  const list = products.filter(p=>p.badge==='new');
+  document.getElementById('new-carousel').innerHTML = list.map(p=>cardHTML(p,'carousel')).join('');
+  list.forEach(p=>renderMobCtrl(p.id));
+}
+
+function cardHTML(p){
+  const art = p._artworkUrl
+    ? `<img src="${p._artworkUrl}" alt="${p.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1;">`
+    : (p.type==='cd' ? cdSVG(220) : vinylSVG(p.c,p.l,220));
+  const badgeMap = {new:'badge-new',sale:'badge-sale',staff:'badge-staff',rare:'badge-rare'};
+  const badgeLbl = {new:'New',sale:'Sale',staff:'Staff Pick',rare:'Rare'};
+  const badge = p.badge ? `<div class="card-badge ${badgeMap[p.badge]}">${badgeLbl[p.badge]}</div>` : '';
+  const genre = genres.find(g=>g.id===p.genre)?.name||p.genre;
+  return `<div class="product-card">
+    <div class="card-art" data-pid="${p.id}">
+      ${art}
+      ${badge}
+      ${!p.localArt ? `<div class="card-loading" id="cl-${p.id}">Loading...</div>` : ''}
+      <div class="card-overlay">
+        <button class="card-add-btn" onclick="addToCart(${p.id})">+ Add to Cart</button>
+      </div>
+      <div class="card-mob-ctrl" id="mob-ctrl-${p.id}"></div>
+    </div>
+    <div class="card-info">
+      <div class="card-type">${p.hasBoth?'CD + Vinyl LP':(p.type==='cd'?'CD':'Vinyl LP')}</div>
+      <div class="card-artist">${p.artist}</div>
+      <div class="card-title">${p.title}</div>
+      <div class="card-footer">
+        <span class="card-price">${p.hasBoth?`$${p.priceCd.toFixed(2)} – $${p.priceVinyl.toFixed(2)}`:`$${p.price.toFixed(2)}`}</span>
+        <span class="card-genre-tag">${genre}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function staffArtHTML(sp){
+  if(sp._artworkUrl) return `<img src="${sp._artworkUrl}" alt="${sp.title}" style="width:80px;height:80px;object-fit:cover;display:block;border-radius:2px;">`;
+  return vinylSVG(sp.c,sp.l,80);
+}
+
+function renderStaffPicks(){
+  document.getElementById('staff-grid').innerHTML = staffPicks.map(sp=>`
+    <div class="staff-card">
+      <div class="staff-art" id="sp-art-${sp.id}">${staffArtHTML(sp)}</div>
+      <div class="staff-body">
+        <div class="staff-artist">${sp.artist}</div>
+        <div class="staff-title">${sp.title}</div>
+        <div class="staff-quote">${sp.quote}</div>
+        <div class="staff-pick-by">— ${sp.by}</div>
+        <div class="staff-price">$${sp.price.toFixed(2)}</div>
+        <button class="staff-add" onclick="addToCart(${sp.id})">+ Add to Cart</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ─── GENRE / TYPE FILTER ───────────────────────────── */
+function setGenre(id){
+  activeGenre = id;
+  renderGenreChips();
+  renderProducts();
+  document.getElementById('products-h').textContent =
+    id==='all' ? 'All Records & CDs' : id==='sale' ? 'On Sale' : id==='rare' ? 'Rare Finds' : (genres.find(g=>g.id===id)?.name || id);
+  document.getElementById('products').scrollIntoView({behavior:'smooth'});
+}
+
+function setType(t,btn){
+  activeType=t;
+  document.querySelectorAll('.type-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+}
+
+/* ─── CAROUSEL ──────────────────────────────────────── */
+function scrollCarousel(id,dir){
+  const el = document.getElementById(id);
+  el.scrollBy({left: dir*240, behavior:'smooth'});
+}
+
+/* ─── FORMAT MODAL ──────────────────────────────────── */
+let _fmtPendingId = null;
+function showFmtModal(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  _fmtPendingId = id;
+  document.getElementById('fmt-modal-title').textContent = p.title;
+  document.getElementById('fmt-modal-artist').textContent = p.artist;
+  document.getElementById('fmt-btn-vinyl').innerHTML = `Vinyl LP<br><span style="font-size:13px;font-weight:400;letter-spacing:0;opacity:.85;">$${p.priceVinyl.toFixed(2)}</span>`;
+  document.getElementById('fmt-btn-cd').innerHTML = `CD<br><span style="font-size:13px;font-weight:400;letter-spacing:0;opacity:.85;">$${p.priceCd.toFixed(2)}</span>`;
+  document.getElementById('fmt-overlay').classList.add('open');
+}
+function closeFmtModal(){
+  document.getElementById('fmt-overlay').classList.remove('open');
+  _fmtPendingId = null;
+}
+function selectFmt(fmt){
+  const id = _fmtPendingId;
+  closeFmtModal();
+  if(id===null) return;
+  addToCartDirect(id, fmt);
+}
+
+/* ─── CART ──────────────────────────────────────────── */
+function addToCart(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  if(p.hasBoth){ showFmtModal(id); return; }
+  addToCartDirect(id, null);
+}
+function addToCartDirect(id, fmt){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  const key = fmt ? `${id}-${fmt}` : String(id);
+  const itemPrice = fmt==='cd' ? (p.priceCd||p.price) : fmt==='vinyl' ? (p.priceVinyl||p.price) : p.price;
+  const ex = cart.find(x=>x._key===key);
+  if(ex) ex.qty++;
+  else cart.push({...p, qty:1, _key:key, type:fmt||p.type, price:itemPrice});
+  updateCount();
+  const fl = fmt==='cd'?'CD':fmt==='vinyl'?'Vinyl LP':'';
+  showToast(`"${p.title}"${fl?' ('+fl+')':''} added to cart`);
+  renderAllMobCtrls();
+}
+
+function updateCount(){
+  const n = cart.reduce((s,x)=>s+x.qty,0);
+  document.getElementById('cart-count').textContent=n;
+  const fab = document.getElementById('mob-cart-fab');
+  const fabCount = document.getElementById('mob-fab-count');
+  if(fab){
+    if(n>0){ fab.classList.remove('hidden'); }
+    else { fab.classList.add('hidden'); }
+  }
+  if(fabCount) fabCount.textContent=n;
+}
+
+function openCart(){
+  renderDrawer();
+  document.getElementById('cart-overlay').classList.add('open');
+  const fab = document.getElementById('mob-cart-fab');
+  if(fab) fab.classList.add('hidden');
+}
+function closeCart(){
+  document.getElementById('cart-overlay').classList.remove('open');
+  const n = cart.reduce((s,x)=>s+x.qty,0);
+  const fab = document.getElementById('mob-cart-fab');
+  if(fab && n>0) fab.classList.remove('hidden');
+}
+function overlayClick(e){ if(e.target.id==='cart-overlay') closeCart(); }
+
+function removeFromCart(key){
+  const item = cart.find(x=>x._key===key);
+  const id = item ? item.id : null;
+  cart=cart.filter(x=>x._key!==key);
+  updateCount();
+  renderDrawer();
+  if(id!==null) renderMobCtrl(id);
+}
+
+/* ── MOBILE QUANTITY CONTROLS ── */
+const trashSVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`;
+
+function renderMobCtrl(id){
+  const els = document.querySelectorAll('[id="mob-ctrl-'+id+'"]');
+  if(!els.length) return;
+  const item = cart.find(x=>x.id===id);
+  const qty = item ? item.qty : 0;
+  const html = qty===0
+    ? `<button class="cmob-add" onclick="mobAdd(${id})" title="Add to Cart">+</button>`
+    : `<button class="cmob-minus" onclick="mobMinus(${id})" title="${qty===1?'Remove':'Remove one'}">${qty===1?trashSVG:'−'}</button>
+      <span class="cmob-qty">${qty}</span>
+      <button class="cmob-plus" onclick="mobPlus(${id})" title="Add one">+</button>`;
+  els.forEach(el => el.innerHTML = html);
+}
+
+function renderAllMobCtrls(){ products.forEach(p=>renderMobCtrl(p.id)); }
+
+function mobAdd(id){ addToCart(id); renderMobCtrl(id); }
+
+function mobPlus(id){
+  const ex=cart.find(x=>x.id===id);
+  if(ex){ ex.qty++; updateCount(); renderMobCtrl(id); if(document.getElementById('cart-overlay').classList.contains('open')) renderDrawer(); }
+  else mobAdd(id);
+}
+
+function mobMinus(id){
+  const ex=cart.find(x=>x.id===id);
+  if(!ex) return;
+  if(ex.qty<=1){ removeFromCart(ex._key); }
+  else { ex.qty--; updateCount(); renderMobCtrl(id); if(document.getElementById('cart-overlay').classList.contains('open')) renderDrawer(); }
+}
+
+function renderDrawer(){
+  const body = document.getElementById('drawer-body');
+  const foot = document.getElementById('drawer-foot');
+  if(cart.length===0){
+    body.innerHTML=`<div class="drawer-empty"><p>Your cart is empty</p></div>`;
+    foot.style.display='none';
+    return;
+  }
+  const total = cart.reduce((s,x)=>s+x.price*x.qty,0);
+  body.innerHTML = cart.map(item=>`
+    <div class="drawer-item">
+      <div class="di-thumb">${item._artworkUrl?`<img src="${item._artworkUrl}" alt="${item.title}" style="width:56px;height:56px;object-fit:cover;display:block;border-radius:2px;">`:(item.type==='cd'?cdSVG(56):vinylSVG(item.c,item.l,56))}</div>
+      <div class="drawer-item-info">
+        <div class="di-artist">${item.artist}</div>
+        <div class="di-title">${item.title}</div>
+        <div class="di-meta">${item.type==='cd'?'CD':'Vinyl'} × ${item.qty}</div>
+        <div class="di-price">$${(item.price*item.qty).toFixed(2)}</div>
+      </div>
+      <button class="di-remove" onclick="removeFromCart('${item._key}')" title="Remove">✕</button>
+    </div>`).join('');
+  document.getElementById('drawer-total').textContent=`$${total.toFixed(2)}`;
+  foot.style.display='block';
+}
+
+function checkout(){
+  if(!cart.length) return;
+  cart=[];
+  updateCount();
+  closeCart();
+  showToast('Thanks! (Demo — no real purchase made)');
+}
+
+/* ─── UTILS ─────────────────────────────────────────── */
+function copyEmail(){
+  navigator.clipboard.writeText('info@shellshockrecords.com').then(()=>showToast('Email copied ✓'));
+}
+
+function openContactModal(e){
+  if(e) e.preventDefault();
+  document.getElementById('contact-modal-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeContactModal(){
+  document.getElementById('contact-modal-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function contactOverlayClick(e){
+  if(e.target===document.getElementById('contact-modal-overlay')) closeContactModal();
+}
+function copyContactEmail(btn){
+  navigator.clipboard.writeText('info@shellshockrecords.com').then(()=>{
+    const orig=btn.textContent;
+    btn.textContent='Copied ✓';
+    setTimeout(()=>btn.textContent=orig, 2000);
+  });
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function handleNews(e){
+  e.preventDefault();
+  showToast('Subscribed! (Demo)');
+  e.target.reset();
+}
+
+/* ─── TODAY'S HOURS ─────────────────────────────────── */
+function toggleMobileMenu(){
+  const menu = document.getElementById('mobile-menu');
+  const btn  = document.getElementById('hamburger');
+  const open = menu.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+  // populate genre links once
+  const mg = document.getElementById('mob-genres');
+  if(open && mg && !mg.children.length){
+    const saleCnt = products.filter(p=>p.badge==='sale').length;
+    const rareCnt = products.filter(p=>p.badge==='rare').length;
+    mg.innerHTML =
+      `<a onclick="setGenre('sale');toggleMobileMenu()">On Sale (${saleCnt})</a>` +
+      `<a onclick="setGenre('rare');toggleMobileMenu()">Rare (${rareCnt})</a>` +
+      genres.map(g=>`<a onclick="setGenre('${g.id}');toggleMobileMenu()">${g.name}</a>`).join('');
+  }
+}
+
+function logoErr(img){
+  if(!img._triedJpg){
+    img._triedJpg = true;
+    img.src = 'store-logo.jpg';
+  } else {
+    img.style.display = 'none';
+    document.getElementById('logo-svg-fb').style.display = 'block';
+  }
+}
+
+function heroLogoErr(img){
+  if(!img._triedPng){
+    img._triedPng = true;
+    img.src = 'store-logo.png';
+  } else {
+    // Swap to SVG clone so hero still looks great without the image file
+    img.style.display = 'none';
+    const src = document.getElementById('logo-svg-fb');
+    if(src){
+      const clone = src.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.style.cssText = 'display:block;width:100%;height:100%;';
+      img.parentNode.appendChild(clone);
+    }
+  }
+}
+
+function highlightToday(){
+  const d = new Date().getDay();
+  const map = {1:'h-mon',4:'h-thu',5:'h-fri',6:'h-sat',0:'h-sun'};
+  const ctmap = {1:'ct-mon',4:'ct-thu',5:'ct-fri',6:'ct-sat',0:'ct-sun'};
+  if(map[d]){
+    document.getElementById(map[d])?.classList.add('today-h');
+    document.getElementById(ctmap[d])?.classList.add('row-today');
+  }
+}
+
+/* ─── NOW PLAYING ───────────────────────────────────── */
+let npIdx=0;
+setInterval(()=>{
+  npIdx=(npIdx+1)%nowPlaying.length;
+  const el=document.getElementById('np-track');
+  if(el){el.style.opacity=0;setTimeout(()=>{el.textContent=nowPlaying[npIdx];el.style.opacity=1;},400);}
+},7000);
+// np-track removed
+
+/* ─── SMOOTH NAV ─────────────────────────────────────── */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const id=a.getAttribute('href').slice(1);
+    const el=document.getElementById(id);
+    if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});}
+  });
+});
+
+/* ─── ALBUM ARTWORK (iTunes Search API) ─────────────── */
+async function fetchArtwork(title, artist) {
+  try {
+    const q = encodeURIComponent(`${title} ${artist}`);
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&media=music&entity=album&limit=5`);
+    const data = await res.json();
+    if (data.results?.length > 0) {
+      const url = data.results[0].artworkUrl100;
+      if (url) return url.replace(/\d+x\d+bb/, '600x600bb');
+    }
+  } catch(e) {}
+  return null;
+}
+
+function injectArtwork(pid, url) {
+  document.querySelectorAll(`.card-art[data-pid="${pid}"]`).forEach(artEl => {
+    // Don't re-inject if img already there
+    if (artEl.querySelector('img')) return;
+    const img = new Image();
+    img.alt = '';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1;';
+    img.src = url;
+    img.onload = () => {
+      artEl.insertBefore(img, artEl.firstChild);
+      const loader = document.getElementById('cl-'+pid);
+      if (loader) loader.remove();
+    };
+  });
+}
+
+async function loadAllArtwork() {
+  for (const p of products) {
+    if (p.localArt) {
+      p._artworkUrl = p.localArt;
+      injectArtwork(p.id, p.localArt);
+      continue;
+    }
+    const url = await fetchArtwork(p.artSearch || p.title, p.artist);
+    if (url) {
+      p._artworkUrl = url;
+      injectArtwork(p.id, url);
+    } else {
+      const loader = document.getElementById('cl-'+p.id);
+      if (loader) loader.remove();
+    }
+    await new Promise(r => setTimeout(r, 220));
+  }
+  // also fetch for staff picks
+  for (const sp of staffPicks) {
+    const prod = products.find(p => p.id === sp.id);
+    if (prod && prod.localArt) {
+      sp._artworkUrl = prod.localArt;
+      const el = document.getElementById(`sp-art-${sp.id}`);
+      if (el) el.innerHTML = `<img src="${prod.localArt}" alt="${sp.title}" style="width:80px;height:80px;object-fit:cover;display:block;border-radius:2px;">`;
+      continue;
+    }
+    const url = await fetchArtwork(sp.title, sp.artist);
+    if (url) {
+      sp._artworkUrl = url;
+      const el = document.getElementById(`sp-art-${sp.id}`);
+      if (el) el.innerHTML = `<img src="${url}" alt="${sp.title}" style="width:80px;height:80px;object-fit:cover;display:block;border-radius:2px;">`;
+    }
+    await new Promise(r => setTimeout(r, 220));
+  }
+}
+
+/* ─── EVENTS ─────────────────────────────────────────── */
+const events = [
+  {
+    month:'Jul', day:'12', dow:'Sat',
+    type:'Live Performance',
+    title:'The Vinyl Sessions: Jazz Night',
+    desc:'Local jazz trio plays live on the shop floor. Grab a record, grab a drink, and enjoy the sounds. Free entry.',
+    time:'7:00 PM', admission:'Free'
+  },
+  {
+    month:'Jul', day:'19', dow:'Sat',
+    type:'Listening Party',
+    title:'New Releases Listening Party',
+    desc:'We spin the hottest new arrivals of the month front to back. First come, first served. Limited space.',
+    time:'6:00 PM', admission:'Free'
+  },
+  {
+    month:'Jul', day:'26', dow:'Sat',
+    type:'In-Store Signing',
+    title:'Local Artist Meet & Greet',
+    desc:'South Florida hip-hop artist stops in to sign copies of their new record. Exclusive limited pressings available.',
+    time:'3:00 PM', admission:'Free'
+  },
+  {
+    month:'Aug', day:'2', dow:'Sat',
+    type:'Crate Dig',
+    title:'Summer Crate Dig & Sale',
+    desc:'Over 500 records marked down for one day only. Dig through new and used stock — rare finds guaranteed.',
+    time:'11:00 AM', admission:'Free'
+  },
+  {
+    month:'Aug', day:'9', dow:'Sat',
+    type:'Listening Party',
+    title:'Classic Albums: Dark Side of the Moon',
+    desc:'50th anniversary full-album listen on our audiophile setup. Limited to 20 attendees. RSVP required.',
+    time:'7:00 PM', admission:'Free · RSVP'
+  },
+  {
+    month:'Aug', day:'23', dow:'Sat',
+    type:'Live Performance',
+    title:'Blues on Wax: Live Blues Night',
+    desc:'Two sets of live blues from Fort Lauderdale\'s best. Vinyl specials on blues records all night.',
+    time:'6:30 PM', admission:'Free'
+  },
+];
+
+function renderEvents(){
+  const grid = document.getElementById('events-grid');
+  if(!grid) return;
+  if(!events.length){
+    grid.innerHTML = `<div class="events-empty">No upcoming events — check back soon.</div>`;
+    return;
+  }
+  grid.innerHTML = events.map(e=>`
+    <div class="event-card">
+      <div class="event-date-block">
+        <div class="event-month">${e.month}</div>
+        <div class="event-day">${e.day}</div>
+        <div class="event-dow">${e.dow}</div>
+      </div>
+      <div class="event-body">
+        <div class="event-type">${e.type}</div>
+        <div class="event-title">${e.title}</div>
+        <div class="event-desc">${e.desc}</div>
+        <div class="event-meta">
+          <span><strong>${e.time}</strong></span>
+          <span><strong>${e.admission}</strong></span>
+        </div>
+        <a class="event-rsvp" onclick="showToast('RSVP coming soon! Call us at 754-227-8300')">RSVP / Learn More →</a>
+      </div>
+    </div>`).join('');
+}
+
+/* ─── BOOT ───────────────────────────────────────────── */
+initGenreDropdown();
+renderGenreChips();
+renderProducts();
+renderNewArrivals();
+renderStaffPicks();
+renderEvents();
+
+// Hero logo: inject SVG as base layer so it always shows (image overlays when available)
+(function(){
+  const wrap = document.getElementById('hero-logo-wrap');
+  const svgSrc = document.getElementById('logo-svg-fb');
+  if(wrap && svgSrc){
+    const clone = svgSrc.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.style.cssText = 'width:100%;height:100%;display:block;';
+    wrap.insertBefore(clone, wrap.firstChild);
+  }
+})();
+highlightToday();
+loadAllArtwork();
+</script>
+</body>
+</html>
