@@ -2469,11 +2469,10 @@ function cardHTML(p){
   const addBtnStyle = isPreorder ? ' style="background:#5500aa;"' : '';
   const addBtnText = isPreorder ? 'Pre-Order Now' : '+ Add to Cart';
   const typeStyle = '';
-  const cardTypeText = p.hasBoth ? 'CD + Vinyl LP' : (p.type==='cd' ? 'CD' : 'Vinyl LP');
+  const baseType = p.hasBoth ? 'CD + Vinyl LP' : (p.type==='cd' ? 'CD' : 'Vinyl LP');
+  const cardTypeText = isPreorder && p.releaseDate ? `${baseType} · Out ${p.releaseDate}` : baseType;
   const priceStr = p.hasBoth ? `$${p.priceCd.toFixed(2)} – $${p.priceVinyl.toFixed(2)}` : `$${p.price.toFixed(2)}`;
-  const genreTag = isPreorder && p.releaseDate
-    ? `<span class="card-genre-tag" style="margin-left:auto;font-size:9px;letter-spacing:.5px;white-space:nowrap;">Out ${p.releaseDate}</span>`
-    : `<span class="card-genre-tag">${genre}</span>`;
+  const genreTag = `<span class="card-genre-tag">${genre}</span>`;
   return `<div class="product-card">
     <div class="card-art" data-pid="${p.id}">
       ${art}
