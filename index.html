@@ -32,6 +32,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       touch-action: pan-y;
+      padding-top: 72px;
     }
 
     /* ── TEST BANNER ───────────────────────────────── */
@@ -69,9 +70,12 @@
     header {
       background: var(--bg);
       border-bottom: 1px solid var(--border);
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 200;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 300;
     }
     .header-inner {
       display: flex;
@@ -262,6 +266,7 @@
       z-index: 2;
     }
     @keyframes slowSpin { from{transform:translateY(-50%) rotate(0deg)} to{transform:translateY(-50%) rotate(360deg)} }
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
     .hero-content {
       position: relative;
       padding: 80px 64px;
@@ -540,9 +545,43 @@
     .badge-new  { background: var(--red);  color:#fff; }
     .badge-sale { background: var(--gold); color:#111; }
     .badge-staff{ background: var(--bg3);  color:var(--gold); border: 1px solid var(--gold-dim); }
-    .badge-rare { background: #4a1a7a; color:#e0b0ff; border: 1px solid #7a3aaa; }
+    .badge-rare { background: var(--gold-dim); color: var(--gold-l); border: 1px solid var(--gold); }
+    .badge-preorder { background: #5500aa; color:#e0b0ff; border: 1px solid #8833dd; }
     .sale-chip.active, .sale-chip:hover { color: #c9963b; border-color: #c9963b; background: rgba(201,150,59,.12); }
     .rare-chip.active, .rare-chip:hover { color: #c080ff; border-color: #7a3aaa; background: rgba(120,50,180,.12); }
+    .preorder-chip.active, .preorder-chip:hover { color: #cc88ff; border-color: #8833dd; background: rgba(120,0,220,.12); }
+
+    /* ── PAGINATION ──────────────────────────────────── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .pg-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pg-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(201,150,59,.1); }
+    .pg-btn:hover:not(.active):not([disabled]) { border-color: var(--text); color: var(--text); }
+    .pg-btn[disabled] { opacity: 0.35; cursor: default; pointer-events: none; }
+    .pg-ellipsis { color: var(--muted2); padding: 0 4px; font-family:'Oswald',sans-serif; font-size:13px; }
 
     .card-info { padding: 14px; }
     .card-type {
@@ -1634,59 +1673,57 @@
       color: var(--muted); font-size: 26px; cursor: pointer;
     }
 
-    /* ── MOBILE CARD CONTROLS (touch devices only) ── */
-    .card-mob-ctrl { display: none; }
-    @media (hover: none) and (pointer: coarse) {
-      .card-overlay { display: none !important; }
-      .card-mob-ctrl {
-        display: flex;
-        position: absolute;
-        bottom: 8px; right: 8px;
-        z-index: 4;
-        align-items: center;
-        gap: 3px;
-      }
-      .cmob-add {
-        background: var(--red);
-        color: #fff;
-        border: none;
-        width: 34px; height: 34px;
-        font-size: 22px; font-weight: 700;
-        cursor: pointer;
-        border-radius: 4px;
-        display: flex; align-items: center; justify-content: center;
-        line-height: 1;
-      }
-      .cmob-minus {
-        background: rgba(30,30,30,.92);
-        color: #fff;
-        border: 1px solid var(--border);
-        width: 30px; height: 30px;
-        font-size: 15px;
-        cursor: pointer;
-        border-radius: 4px;
-        display: flex; align-items: center; justify-content: center;
-      }
-      .cmob-qty {
-        background: rgba(20,20,20,.9);
-        color: var(--text);
-        font-family: 'Oswald', sans-serif;
-        font-size: 14px; font-weight: 600;
-        min-width: 26px; text-align: center;
-        padding: 5px 4px;
-        border-radius: 3px;
-      }
-      .cmob-plus {
-        background: var(--red);
-        color: #fff;
-        border: none;
-        width: 30px; height: 30px;
-        font-size: 18px; font-weight: 700;
-        cursor: pointer;
-        border-radius: 4px;
-        display: flex; align-items: center; justify-content: center;
-      }
+    /* ── CARD QUANTITY CONTROLS (all devices) ── */
+    .card-mob-ctrl {
+      display: flex;
+      position: absolute;
+      bottom: 8px; right: 8px;
+      z-index: 4;
+      align-items: center;
+      gap: 3px;
     }
+    .cmob-add {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      width: 34px; height: 34px;
+      font-size: 22px; font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+    .cmob-minus {
+      background: rgba(30,30,30,.92);
+      color: #fff;
+      border: 1px solid var(--border);
+      width: 30px; height: 30px;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cmob-qty {
+      background: rgba(20,20,20,.9);
+      color: var(--text);
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px; font-weight: 600;
+      min-width: 26px; text-align: center;
+      padding: 5px 4px;
+      border-radius: 3px;
+    }
+    .cmob-plus {
+      background: var(--red);
+      color: #fff;
+      border: none;
+      width: 30px; height: 30px;
+      font-size: 18px; font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* Quantity controls handle add-to-cart — overlay not needed on any device */
+    .card-overlay { display: none !important; }
     @media (max-width: 900px) {
       .footer-inner { grid-template-columns: 1fr 1fr; }
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
@@ -1816,6 +1853,7 @@
         <div class="dropdown-menu" id="genre-dropdown-menu"></div>
       </div>
       <a href="#new-arrivals">New Arrivals</a>
+      <a href="#pre-orders">Pre-Orders</a>
       <a href="#staff-picks">Staff Picks</a>
       <a href="#events">Events</a>
       <a href="#about">About</a>
@@ -1839,6 +1877,7 @@
   <button class="mob-close" onclick="toggleMobileMenu()">✕</button>
   <a href="#home" onclick="toggleMobileMenu()">Home</a>
   <a href="#new-arrivals" onclick="toggleMobileMenu()">New Arrivals</a>
+  <a href="#pre-orders" onclick="toggleMobileMenu()">Pre-Orders</a>
   <a href="#staff-picks" onclick="toggleMobileMenu()">Staff Picks</a>
   <a href="#events" onclick="toggleMobileMenu()">Events</a>
   <a href="#about" onclick="toggleMobileMenu()">About</a>
@@ -1860,6 +1899,7 @@
     <p style="font-size:11px;letter-spacing:1px;color:var(--muted);margin-top:8px;opacity:.7;">Not affiliated with any existing business — this is a demo website.</p>
     <div class="hero-actions">
       <a href="#new-arrivals" class="btn-red">New Arrivals</a>
+      <a href="#pre-orders" class="btn-ghost">Pre-Orders</a>
       <a href="#browse" class="btn-ghost">Browse Genres</a>
     </div>
   </div>
@@ -1893,6 +1933,21 @@
   </div>
 </div>
 
+<!-- PRE-ORDERS carousel -->
+<div class="section-full" id="pre-orders" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="section-inner">
+    <div class="section-head">
+      <h2 style="color:var(--text);">Pre-Orders</h2>
+      <a href="#products" onclick="event.preventDefault();setGenre('preorder');document.getElementById('products').scrollIntoView({behavior:'smooth'})">View All Pre-Orders →</a>
+    </div>
+    <div class="carousel-wrap">
+      <button class="carousel-btn prev" onclick="scrollCarousel('preorder-carousel',-1)">‹</button>
+      <div class="carousel" id="preorder-carousel"></div>
+      <button class="carousel-btn next" onclick="scrollCarousel('preorder-carousel',1)">›</button>
+    </div>
+  </div>
+</div>
+
 <!-- BROWSE GENRES -->
 <div class="genres-bg" id="browse">
   <div class="section">
@@ -1918,10 +1973,11 @@
       </div>
       <div class="search-box">
         <button><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-        <input type="text" id="search-input" placeholder="Search title or artist…" oninput="renderProducts()"/>
+        <input type="text" id="search-input" placeholder="Search title or artist…" oninput="currentPage=1;renderProducts()"/>
       </div>
     </div>
     <div class="product-grid" id="product-grid"></div>
+    <div class="pagination" id="pagination"></div>
   </div>
 </div>
 
@@ -2226,6 +2282,8 @@ const products = [
   {id:80,title:'Enter the Wu-Tang (36 Chambers)',artist:'Wu-Tang Clan',genre:'rap',type:'vinyl',price:36.99,badge:'rare',c:'#0a0c04',l:'#2a3008'},
   {id:81,title:'Reasonable Doubt',artist:'Jay-Z',genre:'rap',type:'vinyl',price:39.99,badge:'rare',c:'#08080e',l:'#1a1a3a'},
   {id:83,title:'The Marshall Mathers LP',artist:'Eminem',genre:'rap',type:'vinyl',price:32.99,badge:'staff',c:'#0a0a0a',l:'#282828'},
+  {id:201,title:'Violence Unimagined',artist:'Cannibal Corpse',genre:'metal',type:'vinyl',price:34.99,badge:'preorder',releaseDate:'Aug 15, 2026',c:'#1a0000',l:'#7a0000',localArt:'album covers/art-violence-2.jpg'},
+  {id:202,title:'Vile',artist:'Cannibal Corpse',genre:'metal',type:'vinyl',price:32.99,badge:'preorder',releaseDate:'Sep 12, 2026',c:'#0a0000',l:'#4a0000',localArt:'album covers/art-vile-2.jpg'},
 ];
 
 const staffPicks = [
@@ -2250,6 +2308,8 @@ const nowPlaying = [
 let cart = [];
 let activeGenre = 'all';
 let activeType  = 'all';
+let currentPage = 1;
+function getPageSize(){ return window.innerWidth <= 680 ? 20 : 24; }
 
 /* ─── SVG HELPERS ───────────────────────────────────── */
 function vinylSVG(c,l,size=200){
@@ -2291,7 +2351,11 @@ function initGenreDropdown(){
   if(!menu) return;
   const saleCnt = products.filter(p=>p.badge==='sale').length;
   const rareCnt = products.filter(p=>p.badge==='rare').length;
+  const preorderCnt = products.filter(p=>p.badge==='preorder').length;
+  const newCnt = products.filter(p=>p.badge==='new').length;
   const special = [
+    `<a href="#products" onclick="event.preventDefault();setGenre('new')">New Arrivals (${newCnt})</a>`,
+    `<a href="#pre-orders" onclick="event.preventDefault();document.getElementById('pre-orders').scrollIntoView({behavior:'smooth'})">Pre-Orders (${preorderCnt})</a>`,
     `<a href="#products" onclick="event.preventDefault();setGenre('sale')">On Sale (${saleCnt})</a>`,
     `<a href="#products" onclick="event.preventDefault();setGenre('rare')">Rare (${rareCnt})</a>`,
   ].join('');
@@ -2305,10 +2369,15 @@ function renderGenreChips(){
   const el = document.getElementById('genre-chips');
   const saleCnt = products.filter(p=>p.badge==='sale').length;
   const rareCnt = products.filter(p=>p.badge==='rare').length;
-  const allChip = `<button class="genre-chip ${activeGenre==='all'?'active':''}" onclick="setGenre('all')">All (${products.length})</button>`;
+  const preorderCnt = products.filter(p=>p.badge==='preorder').length;
+  const newCnt = products.filter(p=>p.badge==='new').length;
+  const allCnt = products.filter(p=>p.badge!=='preorder').length;
+  const allChip = `<button class="genre-chip ${activeGenre==='all'?'active':''}" onclick="setGenre('all')">All (${allCnt})</button>`;
+  const newChip = `<button class="genre-chip ${activeGenre==='new'?'active':''}" onclick="setGenre('new')">New Arrivals (${newCnt})</button>`;
+  const preorderChip = `<button class="genre-chip preorder-chip ${activeGenre==='preorder'?'active':''}" onclick="setGenre('preorder')">Pre-Orders (${preorderCnt})</button>`;
   const saleChip = `<button class="genre-chip sale-chip ${activeGenre==='sale'?'active':''}" onclick="setGenre('sale')">On Sale (${saleCnt})</button>`;
   const rareChip = `<button class="genre-chip rare-chip ${activeGenre==='rare'?'active':''}" onclick="setGenre('rare')">Rare (${rareCnt})</button>`;
-  el.innerHTML = allChip + saleChip + rareChip + genres.map(g=>{
+  el.innerHTML = allChip + newChip + preorderChip + saleChip + rareChip + genres.map(g=>{
     const cnt = products.filter(p=>p.genre===g.id).length;
     return `<button class="genre-chip ${activeGenre===g.id?'active':''}" onclick="setGenre('${g.id}')">${g.name} (${cnt})</button>`;
   }).join('');
@@ -2320,23 +2389,71 @@ function renderProducts(){
   let list = products.filter(p=>{
     if(activeGenre==='sale' && p.badge!=='sale') return false;
     if(activeGenre==='rare' && p.badge!=='rare') return false;
-    if(activeGenre!=='all' && activeGenre!=='sale' && activeGenre!=='rare' && p.genre!==activeGenre) return false;
+    if(activeGenre==='preorder' && p.badge!=='preorder') return false;
+    if(activeGenre==='new' && p.badge!=='new') return false;
+    if(activeGenre==='all' && p.badge==='preorder') return false; // hide preorders from 'all' view
+    if(activeGenre!=='all' && activeGenre!=='sale' && activeGenre!=='rare' && activeGenre!=='preorder' && activeGenre!=='new' && p.genre!==activeGenre) return false;
     if(activeType !=='all' && p.type !==activeType && !p.hasBoth) return false;
     if(q && !p.title.toLowerCase().includes(q) && !p.artist.toLowerCase().includes(q)) return false;
     return true;
   }).sort((a,b)=>a.artist.localeCompare(b.artist));
-  document.getElementById('showing-label').textContent=`Showing ${list.length} item${list.length!==1?'s':''}`;
-  document.getElementById('product-grid').innerHTML = list.length
-    ? list.map(p=>cardHTML(p,'grid')).join('')
+  const ps = getPageSize();
+  const total = list.length;
+  const totalPages = Math.max(1, Math.ceil(total / ps));
+  if(currentPage > totalPages) currentPage = 1;
+  const start = (currentPage - 1) * ps;
+  const pageList = list.slice(start, start + ps);
+  if(total === 0){
+    document.getElementById('showing-label').textContent = 'No items found';
+  } else {
+    document.getElementById('showing-label').textContent = `Showing ${start+1}–${Math.min(start+ps,total)} of ${total} item${total!==1?'s':''}`;
+  }
+  document.getElementById('product-grid').innerHTML = pageList.length
+    ? pageList.map(p=>cardHTML(p)).join('')
     : `<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--muted);">
         <p style="font-family:'Oswald',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:14px;color:var(--muted);margin-top:60px;">No results found</p>
       </div>`;
   renderAllMobCtrls();
+  renderPagination(totalPages, total);
+}
+
+function renderPagination(totalPages, total){
+  const el = document.getElementById('pagination');
+  if(!el) return;
+  if(totalPages <= 1){ el.innerHTML=''; return; }
+  let html = `<button class="pg-btn" onclick="goToPage(${currentPage-1})" ${currentPage===1?'disabled':''} aria-label="Previous">‹</button>`;
+  for(let i=1; i<=totalPages; i++){
+    if(totalPages > 7){
+      if(i===1 || i===totalPages || (i>=currentPage-2 && i<=currentPage+2)){
+        html += `<button class="pg-btn${i===currentPage?' active':''}" onclick="goToPage(${i})">${i}</button>`;
+      } else if(i===currentPage-3 || i===currentPage+3){
+        html += `<span class="pg-ellipsis">…</span>`;
+      }
+    } else {
+      html += `<button class="pg-btn${i===currentPage?' active':''}" onclick="goToPage(${i})">${i}</button>`;
+    }
+  }
+  html += `<button class="pg-btn" onclick="goToPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} aria-label="Next">›</button>`;
+  el.innerHTML = html;
+}
+
+function goToPage(p){
+  currentPage = p;
+  renderProducts();
+  document.getElementById('products').scrollIntoView({behavior:'smooth'});
 }
 
 function renderNewArrivals(){
   const list = products.filter(p=>p.badge==='new');
-  document.getElementById('new-carousel').innerHTML = list.map(p=>cardHTML(p,'carousel')).join('');
+  document.getElementById('new-carousel').innerHTML = list.map(p=>cardHTML(p)).join('');
+  list.forEach(p=>renderMobCtrl(p.id));
+}
+
+function renderPreOrders(){
+  const list = products.filter(p=>p.badge==='preorder');
+  const carousel = document.getElementById('preorder-carousel');
+  if(!carousel) return;
+  carousel.innerHTML = list.map(p=>cardHTML(p)).join('');
   list.forEach(p=>renderMobCtrl(p.id));
 }
 
@@ -2344,27 +2461,36 @@ function cardHTML(p){
   const art = p._artworkUrl
     ? `<img src="${p._artworkUrl}" alt="${p.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:1;">`
     : (p.type==='cd' ? cdSVG(220) : vinylSVG(p.c,p.l,220));
-  const badgeMap = {new:'badge-new',sale:'badge-sale',staff:'badge-staff',rare:'badge-rare'};
-  const badgeLbl = {new:'New',sale:'Sale',staff:'Staff Pick',rare:'Rare'};
-  const badge = p.badge ? `<div class="card-badge ${badgeMap[p.badge]}">${badgeLbl[p.badge]}</div>` : '';
+  const badgeMap = {new:'badge-new',sale:'badge-sale',staff:'badge-staff',rare:'badge-rare',preorder:'badge-preorder'};
+  const badgeLbl = {new:'New',sale:'Sale',staff:'Staff Pick',rare:'Rare',preorder:'Pre-Order'};
+  const badge = p.badge ? `<div class="card-badge ${badgeMap[p.badge]||''}">${badgeLbl[p.badge]||p.badge}</div>` : '';
   const genre = genres.find(g=>g.id===p.genre)?.name||p.genre;
+  const isPreorder = p.badge==='preorder';
+  const addBtnStyle = isPreorder ? ' style="background:#5500aa;"' : '';
+  const addBtnText = isPreorder ? 'Pre-Order Now' : '+ Add to Cart';
+  const typeStyle = '';
+  const cardTypeText = p.hasBoth ? 'CD + Vinyl LP' : (p.type==='cd' ? 'CD' : 'Vinyl LP');
+  const priceStr = p.hasBoth ? `$${p.priceCd.toFixed(2)} – $${p.priceVinyl.toFixed(2)}` : `$${p.price.toFixed(2)}`;
+  const genreTag = isPreorder && p.releaseDate
+    ? `<span class="card-genre-tag" style="margin-left:auto;font-size:9px;letter-spacing:.5px;white-space:nowrap;">Out ${p.releaseDate}</span>`
+    : `<span class="card-genre-tag">${genre}</span>`;
   return `<div class="product-card">
     <div class="card-art" data-pid="${p.id}">
       ${art}
       ${badge}
       ${!p.localArt ? `<div class="card-loading" id="cl-${p.id}">Loading...</div>` : ''}
       <div class="card-overlay">
-        <button class="card-add-btn" onclick="addToCart(${p.id})">+ Add to Cart</button>
+        <button class="card-add-btn"${addBtnStyle} onclick="addToCart(${p.id})">${addBtnText}</button>
       </div>
       <div class="card-mob-ctrl" id="mob-ctrl-${p.id}"></div>
     </div>
     <div class="card-info">
-      <div class="card-type">${p.hasBoth?'CD + Vinyl LP':(p.type==='cd'?'CD':'Vinyl LP')}</div>
+      <div class="card-type"${typeStyle}>${cardTypeText}</div>
       <div class="card-artist">${p.artist}</div>
       <div class="card-title">${p.title}</div>
       <div class="card-footer">
-        <span class="card-price">${p.hasBoth?`$${p.priceCd.toFixed(2)} – $${p.priceVinyl.toFixed(2)}`:`$${p.price.toFixed(2)}`}</span>
-        <span class="card-genre-tag">${genre}</span>
+        <span class="card-price">${priceStr}</span>
+        ${genreTag}
       </div>
     </div>
   </div>`;
@@ -2393,15 +2519,22 @@ function renderStaffPicks(){
 /* ─── GENRE / TYPE FILTER ───────────────────────────── */
 function setGenre(id){
   activeGenre = id;
+  currentPage = 1;
   renderGenreChips();
   renderProducts();
   document.getElementById('products-h').textContent =
-    id==='all' ? 'All Records & CDs' : id==='sale' ? 'On Sale' : id==='rare' ? 'Rare Finds' : (genres.find(g=>g.id===id)?.name || id);
+    id==='all' ? 'All Records & CDs' :
+    id==='sale' ? 'On Sale' :
+    id==='rare' ? 'Rare Finds' :
+    id==='preorder' ? 'Pre-Orders' :
+    id==='new' ? 'New Arrivals' :
+    (genres.find(g=>g.id===id)?.name || id);
   document.getElementById('products').scrollIntoView({behavior:'smooth'});
 }
 
 function setType(t,btn){
   activeType=t;
+  currentPage=1;
   document.querySelectorAll('.type-pill').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderProducts();
@@ -2602,12 +2735,15 @@ function toggleMobileMenu(){
   const open = menu.classList.toggle('open');
   btn.classList.toggle('open', open);
   document.body.style.overflow = open ? 'hidden' : '';
-  // populate genre links once
   const mg = document.getElementById('mob-genres');
-  if(open && mg && !mg.children.length){
+  if(open && mg){
     const saleCnt = products.filter(p=>p.badge==='sale').length;
     const rareCnt = products.filter(p=>p.badge==='rare').length;
+    const preorderCnt = products.filter(p=>p.badge==='preorder').length;
+    const newCnt = products.filter(p=>p.badge==='new').length;
     mg.innerHTML =
+      `<a onclick="setGenre('new');toggleMobileMenu()">New Arrivals (${newCnt})</a>` +
+      `<a onclick="setGenre('preorder');toggleMobileMenu()">Pre-Orders (${preorderCnt})</a>` +
       `<a onclick="setGenre('sale');toggleMobileMenu()">On Sale (${saleCnt})</a>` +
       `<a onclick="setGenre('rare');toggleMobileMenu()">Rare (${rareCnt})</a>` +
       genres.map(g=>`<a onclick="setGenre('${g.id}');toggleMobileMenu()">${g.name}</a>`).join('');
@@ -2813,6 +2949,7 @@ initGenreDropdown();
 renderGenreChips();
 renderProducts();
 renderNewArrivals();
+renderPreOrders();
 renderStaffPicks();
 renderEvents();
 
